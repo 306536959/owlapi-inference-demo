@@ -1,0 +1,104 @@
+{
+  "ontologyIRI": "http://example.com/medical#ont",
+  "inference": {
+    "reasoner": "HermiT",
+    "materialize": {
+      "subClassOf": true,
+      "classAssertions": true,
+      "objectPropertyAssertions": true,
+      "objectPropertiesToMaterialize": [
+        "http://example.com/medical#canView"
+      ]
+    }
+  },
+  "axioms": {
+    "dataPropertyDomain": [
+      {
+        "property": "http://example.com/medical#doctorName",
+        "domain": { "type": "Class", "iri": "http://example.com/medical#Doctor" }
+      },
+      {
+        "property": "http://example.com/medical#patientId",
+        "domain": { "type": "Class", "iri": "http://example.com/medical#Patient" }
+      },
+      {
+        "property": "http://example.com/medical#recordNotes",
+        "domain": { "type": "Class", "iri": "http://example.com/medical#MedicalRecord" }
+      }
+    ],
+    "dataPropertyRange": [
+      {
+        "property": "http://example.com/medical#doctorName",
+        "range": { "datatype": "http://www.w3.org/2001/XMLSchema#string" }
+      },
+      {
+        "property": "http://example.com/medical#patientId",
+        "range": { "datatype": "http://www.w3.org/2001/XMLSchema#string" }
+      },
+      {
+        "property": "http://example.com/medical#recordNotes",
+        "range": { "datatype": "http://www.w3.org/2001/XMLSchema#string" }
+      }
+    ],
+    "objectPropertyDomain": [
+      {
+        "property": "http://example.com/medical#writesRecord",
+        "domain": { "type": "Class", "iri": "http://example.com/medical#Doctor" }
+      },
+      {
+        "property": "http://example.com/medical#ownsRecord",
+        "domain": { "type": "Class", "iri": "http://example.com/medical#Patient" }
+      }
+    ],
+    "objectPropertyRange": [
+      {
+        "property": "http://example.com/medical#writesRecord",
+        "range": { "type": "Class", "iri": "http://example.com/medical#MedicalRecord" }
+      },
+      {
+        "property": "http://example.com/medical#ownsRecord",
+        "range": { "type": "Class", "iri": "http://example.com/medical#MedicalRecord" }
+      }
+    ],
+    "objectPropertyAssertions": [
+      {
+        "property": "http://example.com/medical#writesRecord",
+        "subject": "http://example.com/medical#dr_zhang",
+        "object": "http://example.com/medical#rec_001"
+      },
+      {
+        "property": "http://example.com/medical#ownsRecord",
+        "subject": "http://example.com/medical#pat_li",
+        "object": "http://example.com/medical#rec_001"
+      }
+    ],
+    "objectPropertySubPropertyOf": [
+      {
+        "sub": "http://example.com/medical#writesRecord",
+        "sup": "http://example.com/medical#canView"
+      },
+      {
+        "sub": "http://example.com/medical#ownsRecord",
+        "sup": "http://example.com/medical#canView"
+      }
+    ],
+    "dataPropertyAssertions": [
+      {
+        "property": "http://example.com/medical#doctorName",
+        "subject": "http://example.com/medical#dr_zhang",
+        "value": { "literal": "张三", "datatype": "http://www.w3.org/2001/XMLSchema#string" }
+      },
+      {
+        "property": "http://example.com/medical#patientId",
+        "subject": "http://example.com/medical#pat_li",
+        "value": { "literal": "P-1001", "datatype": "http://www.w3.org/2001/XMLSchema#string" }
+      },
+      {
+        "property": "http://example.com/medical#recordNotes",
+        "subject": "http://example.com/medical#rec_001",
+        "value": { "literal": "高血压复诊", "datatype": "http://www.w3.org/2001/XMLSchema#string" }
+      }
+    ]
+  }
+}
+

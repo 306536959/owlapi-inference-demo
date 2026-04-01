@@ -1,0 +1,32 @@
+[PrefixDeclaration]
+:		http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-26/
+g:		http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-26/
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+mappingId	MAPPING-ID1
+target		:doctors/doctor_id={doctor_id} a :doctors ; :doctors#doctor_id {doctor_id}^^xsd:integer ; :doctors#name {name}^^xsd:string ; :doctors#department {department}^^xsd:string ; :doctors#title {title}^^xsd:string . 
+source		SELECT * FROM `doctors`
+
+mappingId	MAPPING-ID2
+target		:medical_records/record_id={record_id} a :medical_records ; :medical_records#record_id {record_id}^^xsd:integer ; :medical_records#patient_id {patient_id}^^xsd:integer ; :medical_records#doctor_id {doctor_id}^^xsd:integer ; :medical_records#diagnosis {diagnosis}^^xsd:string ; :medical_records#prescription {prescription}^^xsd:string ; :medical_records#record_date {record_date}^^xsd:date . 
+source		SELECT * FROM `medical_records`
+
+mappingId	MAPPING-ID3
+target		:medical_records/record_id={medical_records_record_id} :medical_records#ref-doctor_id :doctors/doctor_id={doctors_doctor_id} . 
+source		SELECT `medical_records`.`record_id` AS `medical_records_record_id`, `doctors`.`doctor_id` AS `doctors_doctor_id` FROM `medical_records`, `doctors` WHERE `medical_records`.`doctor_id` = `doctors`.`doctor_id`
+
+mappingId	MAPPING-ID4
+target		:medical_records/record_id={medical_records_record_id} :medical_records#ref-patient_id :patients/patient_id={patients_patient_id} . 
+source		SELECT `medical_records`.`record_id` AS `medical_records_record_id`, `patients`.`patient_id` AS `patients_patient_id` FROM `medical_records`, `patients` WHERE `medical_records`.`patient_id` = `patients`.`patient_id`
+
+mappingId	MAPPING-ID5
+target		:patients/patient_id={patient_id} a :patients ; :patients#patient_id {patient_id}^^xsd:integer ; :patients#name {name}^^xsd:string ; :patients#birth_date {birth_date}^^xsd:date ; :patients#gender {gender}^^xsd:string . 
+source		SELECT * FROM `patients`
+]]
+

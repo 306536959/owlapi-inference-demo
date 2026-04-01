@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.com/medical#schema#"
+     xml:base="http://example.com/medical#schema"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://example.com/medical#schema"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/2001/XMLSchema#date -->
+
+
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://example.com/medical#ref_medical_records_to_doctors_medical_records_ibfk_2 -->
+
+
+    <owl:ObjectProperty rdf:about="http://example.com/medical#ref_medical_records_to_doctors_medical_records_ibfk_2">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://example.com/medical#doctors"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://example.com/medical#ref_medical_records_to_patients_medical_records_ibfk_1 -->
+
+
+    <owl:ObjectProperty rdf:about="http://example.com/medical#ref_medical_records_to_patients_medical_records_ibfk_1">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://example.com/medical#patients"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://example.com/medical#doctors_department -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#doctors_department">
+        <rdfs:domain rdf:resource="http://example.com/medical#doctors"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#doctors_doctor_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#doctors_doctor_id">
+        <rdfs:domain rdf:resource="http://example.com/medical#doctors"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#doctors_name -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#doctors_name">
+        <rdfs:domain rdf:resource="http://example.com/medical#doctors"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#doctors_title -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#doctors_title">
+        <rdfs:domain rdf:resource="http://example.com/medical#doctors"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#medical_records_diagnosis -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#medical_records_diagnosis">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#medical_records_doctor_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#medical_records_doctor_id">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#medical_records_patient_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#medical_records_patient_id">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#medical_records_prescription -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#medical_records_prescription">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#medical_records_record_date -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#medical_records_record_date">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#medical_records_record_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#medical_records_record_id">
+        <rdfs:domain rdf:resource="http://example.com/medical#medical_records"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#patients_birth_date -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#patients_birth_date">
+        <rdfs:domain rdf:resource="http://example.com/medical#patients"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#patients_gender -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#patients_gender">
+        <rdfs:domain rdf:resource="http://example.com/medical#patients"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#patients_name -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#patients_name">
+        <rdfs:domain rdf:resource="http://example.com/medical#patients"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/medical#patients_patient_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/medical#patients_patient_id">
+        <rdfs:domain rdf:resource="http://example.com/medical#patients"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://example.com/medical#doctors -->
+
+
+    <owl:Class rdf:about="http://example.com/medical#doctors"/>
+    
+
+
+    <!-- http://example.com/medical#medical_records -->
+
+
+    <owl:Class rdf:about="http://example.com/medical#medical_records"/>
+    
+
+
+    <!-- http://example.com/medical#patients -->
+
+
+    <owl:Class rdf:about="http://example.com/medical#patients"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 5.1.9.2018-12-12T06:37:32Z) https://github.com/owlcs/owlapi/ -->
+
+

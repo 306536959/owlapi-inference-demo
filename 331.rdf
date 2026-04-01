@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/"
+     xml:base="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/"
+     xmlns:ggg="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#ref-doctor_id -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#ref-doctor_id"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#ref-patient_id -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#ref-patient_id"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#department -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#department"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#doctor_id -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#doctor_id"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#name -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#name"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#title -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors#title"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#diagnosis -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#diagnosis"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#doctor_id -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#doctor_id"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#patient_id -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#patient_id"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#prescription -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#prescription"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#record_date -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#record_date"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#record_id -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records#record_id"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#birth_date -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#birth_date"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#gender -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#gender"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#name -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#name"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#patient_id -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients#patient_id"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/doctors"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/medical_records"/>
+    
+
+
+    <!-- http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/30653/ontologies/2026/2/untitled-ontology-27/patients"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+

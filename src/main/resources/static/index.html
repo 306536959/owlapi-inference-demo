@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphDB 管理界面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">GraphDB 仓库管理</h1>
+        
+        <!-- 仓库列表 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>仓库列表</h5>
+                <div class="float-end">
+                    <button id="create-btn" class="btn btn-success btn-sm me-2">新建仓库</button>
+                    <button id="refresh-btn" class="btn btn-primary btn-sm">刷新</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="repositories-list" class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>仓库 ID</th>
+                                <th>标题</th>
+                                <th>类型</th>
+                                <th>状态</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="repositories-body">
+                            <tr>
+                                <td colspan="5" class="text-center">加载中...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 仓库详情 -->
+        <div class="card mb-4" id="repository-details" style="display: none;">
+            <div class="card-header">
+                <h5>仓库详情</h5>
+                <button id="back-btn" class="btn btn-secondary btn-sm float-end">返回</button>
+            </div>
+            <div class="card-body">
+                <div id="details-content">
+                    <!-- 仓库详情将在这里显示 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新建仓库模态框 -->
+    <div class="modal fade" id="createRepositoryModal" tabindex="-1" aria-labelledby="createRepositoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createRepositoryModalLabel">新建仓库</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createRepositoryForm">
+                        <!-- 1. 仓库信息 -->
+                        <div class="mb-4 p-3 border rounded">
+                            <h5>1. 仓库信息</h5>
+                            <div class="mb-3">
+                                <label for="repoId" class="form-label">仓库 ID</label>
+                                <input type="text" class="form-control" id="repoId" name="id" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="repoTitle" class="form-label">标题</label>
+                                <input type="text" class="form-control" id="repoTitle" name="title" required>
+                            </div>
+                            <input type="hidden" id="repoType" name="type" value="ontop">
+                        </div>
+
+                        <!-- 2. 数据库连接配置 -->
+                        <div class="mb-4 p-3 border rounded">
+                            <h5>2. 数据库连接配置</h5>
+                            <div class="mb-3">
+                                <label for="dbUrl" class="form-label">数据库 URL</label>
+                                <input type="text" class="form-control" id="dbUrl" name="dbUrl" placeholder="jdbc:mysql://localhost:3306/medical_db" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbUser" class="form-label">数据库用户名</label>
+                                <input type="text" class="form-control" id="dbUser" name="dbUser" placeholder="root" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbPassword" class="form-label">数据库密码</label>
+                                <input type="password" class="form-control" id="dbPassword" name="dbPassword" placeholder="123456" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="dbDriver" class="form-label">数据库驱动</label>
+                                <input type="text" class="form-control" id="dbDriver" name="dbDriver" placeholder="com.mysql.cj.jdbc.Driver" required>
+                            </div>
+                        </div>
+
+                        <!-- 3. Ontop 相关配置 -->
+                        <div class="mb-4 p-3 border rounded">
+                            <h5>3. Ontop 相关配置</h5>
+                            <div class="mb-3">
+                                <label for="ontopOwlFile" class="form-label">OWL 本体文件</label>
+                                <input type="file" class="form-control" id="ontopOwlFile" name="owlFile" accept=".owl,.rdf,.ttl" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ontopObdaFile" class="form-label">OBDA 映射文件</label>
+                                <input type="file" class="form-control" id="ontopObdaFile" name="obdaFile" accept=".obda" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="baseIri" class="form-label">Base IRI</label>
+                                <input type="text" class="form-control" id="baseIri" name="baseIri" placeholder="http://example.com/medical#" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submitCreateRepo">创建</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 加载仓库列表
+        function loadRepositories() {
+            fetch('/api/graphdb/repositories')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('repositories-body');
+                    tbody.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center">没有仓库</td></tr>';
+                        return;
+                    }
+                    
+                    data.forEach(repo => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${repo.id}</td>
+                            <td>${repo.title}</td>
+                            <td>${repo.type}</td>
+                            <td>${repo.status}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm view-btn" data-repo-id="${repo.id}">查看</button>
+                                <button class="btn btn-warning btn-sm restart-btn" data-repo-id="${repo.id}">重启</button>
+                                <button class="btn btn-danger btn-sm delete-btn" data-repo-id="${repo.id}">删除</button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                    
+                    // 绑定事件
+                    bindEvents();
+                })
+                .catch(error => {
+                    console.error('加载仓库列表失败:', error);
+                    document.getElementById('repositories-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">加载失败</td></tr>';
+                });
+        }
+        
+        // 加载仓库详情
+        function loadRepositoryDetails(repoId) {
+            fetch(`/api/graphdb/repositories/${repoId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const detailsContent = document.getElementById('details-content');
+                    detailsContent.innerHTML = `
+                        <div class="mb-3">
+                            <label class="form-label">仓库 ID:</label>
+                            <p>${data.id}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">标题:</label>
+                            <p>${data.title}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">类型:</label>
+                            <p>${data.type}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">状态:</label>
+                            <p>${data.status}</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">三元组数量:</label>
+                            <p id="repository-size">加载中...</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">配置:</label>
+                            <pre>${JSON.stringify(data.configuration, null, 2)}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SPARQL 查询 -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>SPARQL 查询</h3>
+                </div>
+                <div class="card-body">
+                    <form id="sparqlForm">
+                        <div class="mb-3">
+                            <label for="sparqlRepository" class="form-label">选择仓库</label>
+                            <select class="form-select" id="sparqlRepository" required>
+                                <option value="">请选择仓库</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="sparqlQuery" class="form-label">SPARQL 查询</label>
+                            <textarea class="form-control" id="sparqlQuery" rows="5" placeholder="输入 SPARQL 查询语句..." required>
+PREFIX rdf: &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;
+
+SELECT ?s ?p ?o
+WHERE {
+  ?s ?p ?o
+}
+LIMIT 10
+                            </textarea>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="executeSparql">执行查询</button>
+                    </form>
+                    <div id="sparqlResults" class="mt-4">
+                        <!-- 查询结果将显示在这里 -->
+                    </div>
+                    `;
+                    
+                    // 加载仓库大小
+                    fetch(`/api/graphdb/repositories/${repoId}/size`)
+                        .then(response => response.json())
+                        .then(sizeData => {
+                            document.getElementById('repository-size').textContent = sizeData.size;
+                        })
+                        .catch(error => {
+                            console.error('加载仓库大小失败:', error);
+                            document.getElementById('repository-size').textContent = '加载失败';
+                        });
+                    
+                    // 显示详情面板
+                    document.getElementById('repositories-list').style.display = 'none';
+                    document.getElementById('repository-details').style.display = 'block';
+                    
+                    // 设置 SPARQL 查询部分的仓库选择下拉框为当前仓库
+                    const sparqlRepository = document.getElementById('sparqlRepository');
+                    if (sparqlRepository) {
+                        // 先加载仓库列表
+                        loadRepositoriesToSparqlDropdown().then(() => {
+                            // 然后设置当前仓库
+                            sparqlRepository.value = repoId;
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('加载仓库详情失败:', error);
+                    document.getElementById('details-content').innerHTML = '<div class="alert alert-danger">加载详情失败</div>';
+                });
+        }
+        
+        // 重启仓库
+        function restartRepository(repoId) {
+            if (confirm(`确定要重启仓库 ${repoId} 吗？`)) {
+                fetch(`/api/graphdb/repositories/${repoId}/restart`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('仓库重启成功');
+                        loadRepositories();
+                    } else {
+                        throw new Error('重启失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('重启仓库失败:', error);
+                    alert('重启仓库失败');
+                });
+            }
+        }
+        
+        // 删除仓库
+        function deleteRepository(repoId) {
+            if (confirm(`确定要删除仓库 ${repoId} 吗？此操作不可恢复！`)) {
+                fetch(`/api/graphdb/repositories/${repoId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('仓库删除成功');
+                        loadRepositories();
+                    } else {
+                        throw new Error('删除失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('删除仓库失败:', error);
+                    alert('删除仓库失败');
+                });
+            }
+        }
+        
+        // 绑定事件
+        function bindEvents() {
+            // 查看按钮
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const repoId = this.getAttribute('data-repo-id');
+                    loadRepositoryDetails(repoId);
+                });
+            });
+            
+            // 重启按钮
+            document.querySelectorAll('.restart-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const repoId = this.getAttribute('data-repo-id');
+                    restartRepository(repoId);
+                });
+            });
+            
+            // 删除按钮
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const repoId = this.getAttribute('data-repo-id');
+                    deleteRepository(repoId);
+                });
+            });
+            
+            // 执行 SPARQL 查询按钮
+            document.getElementById('executeSparql')?.addEventListener('click', function() {
+                executeSparqlQuery();
+            });
+        }
+        
+        // 加载仓库列表到 SPARQL 查询的下拉框
+        function loadRepositoriesToSparqlDropdown() {
+            return new Promise((resolve, reject) => {
+                fetch('/api/graphdb/repositories')
+                    .then(response => response.json())
+                    .then(data => {
+                        const dropdown = document.getElementById('sparqlRepository');
+                        if (dropdown) {
+                            // 清空现有选项
+                            dropdown.innerHTML = '<option value="">请选择仓库</option>';
+                            
+                            // 添加仓库选项
+                            data.forEach(repo => {
+                                const option = document.createElement('option');
+                                option.value = repo.id;
+                                option.textContent = repo.title || repo.id;
+                                dropdown.appendChild(option);
+                            });
+                        }
+                        resolve();
+                    })
+                    .catch(error => {
+                        console.error('加载仓库列表失败:', error);
+                        reject(error);
+                    });
+            });
+        }
+        
+        // 执行 SPARQL 查询
+        function executeSparqlQuery() {
+            const repoId = document.getElementById('sparqlRepository').value;
+            const query = document.getElementById('sparqlQuery').value;
+            
+            if (!repoId || !query) {
+                alert('请选择仓库并输入查询语句');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('sparqlResults');
+            resultsDiv.innerHTML = '<div class="alert alert-info">查询执行中...</div>';
+            
+            fetch('/api/graphdb/repositories/' + repoId + '/sparql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'query=' + encodeURIComponent(query)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.results && data.results.bindings) {
+                    // 显示结果表格
+                    const bindings = data.results.bindings;
+                    const variables = data.head.vars;
+                    
+                    let tableHTML = '<table class="table table-striped">';
+                    tableHTML += '<thead><tr>';
+                    variables.forEach(variable => {
+                        tableHTML += '<th>' + variable + '</th>';
+                    });
+                    tableHTML += '</tr></thead><tbody>';
+                    
+                    bindings.forEach(binding => {
+                        tableHTML += '<tr>';
+                        variables.forEach(variable => {
+                            if (binding[variable]) {
+                                tableHTML += '<td>' + binding[variable].value + '</td>';
+                            } else {
+                                tableHTML += '<td>-</td>';
+                            }
+                        });
+                        tableHTML += '</tr>';
+                    });
+                    
+                    tableHTML += '</tbody></table>';
+                    resultsDiv.innerHTML = tableHTML;
+                } else {
+                    resultsDiv.innerHTML = '<div class="alert alert-warning">无结果</div>';
+                }
+            })
+            .catch(error => {
+                console.error('执行 SPARQL 查询失败:', error);
+                resultsDiv.innerHTML = '<div class="alert alert-danger">查询失败: ' + error.message + '</div>';
+            });
+        }
+        
+        // 新建 Ontop 虚拟库
+        function createRepository() {
+            const form = document.getElementById('createRepositoryForm');
+            const formData = new FormData(form);
+            
+            // 处理 Ontop 虚拟库创建
+            fetch('/api/graphdb/repositories/ontop', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Ontop 虚拟库创建成功');
+                    loadRepositories();
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createRepositoryModal'));
+                    modal.hide();
+                    // 重置表单
+                    form.reset();
+                } else {
+                    throw new Error('创建失败');
+                }
+            })
+            .catch(error => {
+                console.error('创建 Ontop 虚拟库失败:', error);
+                alert('创建 Ontop 虚拟库失败');
+            });
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载仓库列表
+            loadRepositories();
+            
+            // 刷新按钮
+            document.getElementById('refresh-btn').addEventListener('click', loadRepositories);
+            
+            // 返回按钮
+            document.getElementById('back-btn').addEventListener('click', function() {
+                document.getElementById('repository-details').style.display = 'none';
+                document.getElementById('repositories-list').style.display = 'block';
+            });
+            
+            // 新建仓库按钮
+            document.getElementById('create-btn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('createRepositoryModal'));
+                modal.show();
+            });
+            
+            // 提交创建仓库表单
+            document.getElementById('submitCreateRepo').addEventListener('click', createRepository);
+            
+            // 加载仓库列表到 SPARQL 查询的下拉框
+            loadRepositoriesToSparqlDropdown();
+        });
+    </script>
+</body>
+</html>

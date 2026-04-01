@@ -1,0 +1,27 @@
+server:
+  port: 8083
+
+ontology:
+  # 内置数据库扫描 -> OWL 生成（启动时可选）
+  bootstrap:
+    enabled: true
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/medical_db
+    user: root
+    password: 123456
+    # 可选：指定 catalog/schema，按你的数据库情况填
+    catalog: medical_db
+    schema:
+    # 扫描哪些表（SQL LIKE 模式）
+    table-pattern: "%"
+    # 精确表名白名单（空表示不过滤）
+    include-tables: []
+    # 精确表名黑名单
+    exclude-tables: []
+    base-iri: http://example.com/medical#
+    output: schema-auto.owl
+    driver-class: com.mysql.cj.jdbc.Driver
+  # GraphDB 配置
+  graph-db:
+    url: http://192.168.10.97:7200
+    repository-id: test
+

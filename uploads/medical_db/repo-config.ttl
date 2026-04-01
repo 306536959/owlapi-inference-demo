@@ -1,0 +1,13 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rep: <http://www.openrdf.org/config/repository#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<#medical_db> a rep:Repository;
+  rep:repositoryID "medical_db";
+  rep:repositoryImpl [
+      <http://inf.unibz.it/krdb/obda/quest#propertiesFile> "config.properties";
+      <http://inf.unibz.it/krdb/obda/quest#obdaFile> "mapping.obda";
+      <http://inf.unibz.it/krdb/obda/quest#owlFile> "ontology.owl";
+      rep:repositoryType "graphdb:OntopRepository"
+    ];
+  rdfs:label "medical_db" .
