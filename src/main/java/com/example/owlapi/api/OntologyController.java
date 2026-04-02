@@ -416,7 +416,10 @@ public class OntologyController {
                 files.put("owl", owlInfo);
             }
             
-            File obdaFile = new File(rootDir, "schema-auto.obda");
+            File obdaFile = new File(rootDir, "schema-auto.obda.obda");
+            if (!obdaFile.exists()) {
+                obdaFile = new File(rootDir, "schema-auto.obda");
+            }
             if (obdaFile.exists()) {
                 Map<String, Object> obdaInfo = new HashMap<>();
                 obdaInfo.put("name", obdaFile.getName());

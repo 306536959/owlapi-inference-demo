@@ -1,0 +1,547 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.com/ontology#schema#"
+     xml:base="http://example.com/ontology#schema"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://example.com/ontology#schema"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Datatypes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://www.w3.org/2001/XMLSchema#date -->
+
+
+    <rdfs:Datatype rdf:about="http://www.w3.org/2001/XMLSchema#date"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://example.com/ontology#ref_infection_diagnosis_to_doctor_fk_diag_doctor -->
+
+
+    <owl:ObjectProperty rdf:about="http://example.com/ontology#ref_infection_diagnosis_to_doctor_fk_diag_doctor">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://example.com/ontology#doctor"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://example.com/ontology#ref_infection_diagnosis_to_infectious_disease_fk_diag_disease -->
+
+
+    <owl:ObjectProperty rdf:about="http://example.com/ontology#ref_infection_diagnosis_to_infectious_disease_fk_diag_disease">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://example.com/ontology#infectious_disease"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://example.com/ontology#ref_infection_diagnosis_to_patient_fk_diag_patient -->
+
+
+    <owl:ObjectProperty rdf:about="http://example.com/ontology#ref_infection_diagnosis_to_patient_fk_diag_patient">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://example.com/ontology#patient"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://example.com/ontology#doctor_age -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_age">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_dept_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_dept_id">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_doctor_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_doctor_id">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_doctor_name -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_doctor_name">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_gender -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_gender">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_hire_date -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_hire_date">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_phone -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_phone">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#doctor_title -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#doctor_title">
+        <rdfs:domain rdf:resource="http://example.com/ontology#doctor"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_body_temperature -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_body_temperature">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_current_status -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_current_status">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_diag_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_diag_id">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_diagnosis_date -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_diagnosis_date">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_diagnosis_type -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_diagnosis_type">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_disease_code -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_disease_code">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_doctor_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_doctor_id">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_has_fever -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_has_fever">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_is_reported -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_is_reported">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_patient_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_patient_id">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_remarks -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_remarks">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_report_date -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_report_date">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_symptoms -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_symptoms">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis_treatment_plan -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infection_diagnosis_treatment_plan">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infection_diagnosis"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_disease_code -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_disease_code">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_disease_name -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_disease_name">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_disease_type -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_disease_type">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_incubation_period -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_incubation_period">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_report_deadline -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_report_deadline">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_severity_level -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_severity_level">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease_transmission_route -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#infectious_disease_transmission_route">
+        <rdfs:domain rdf:resource="http://example.com/ontology#infectious_disease"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_address -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_address">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_age -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_age">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_allergy_history -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_allergy_history">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_blood_type -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_blood_type">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_gender -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_gender">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_id_card -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_id_card">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_patient_id -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_patient_id">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_patient_name -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_patient_name">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_phone -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_phone">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://example.com/ontology#patient_registration_date -->
+
+
+    <owl:DatatypeProperty rdf:about="http://example.com/ontology#patient_registration_date">
+        <rdfs:domain rdf:resource="http://example.com/ontology#patient"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+
+    
+
+
+    <!-- http://example.com/ontology#doctor -->
+
+
+    <owl:Class rdf:about="http://example.com/ontology#doctor"/>
+    
+
+
+    <!-- http://example.com/ontology#infection_diagnosis -->
+
+
+    <owl:Class rdf:about="http://example.com/ontology#infection_diagnosis"/>
+    
+
+
+    <!-- http://example.com/ontology#infectious_disease -->
+
+
+    <owl:Class rdf:about="http://example.com/ontology#infectious_disease"/>
+    
+
+
+    <!-- http://example.com/ontology#patient -->
+
+
+    <owl:Class rdf:about="http://example.com/ontology#patient"/>
+
+    <!-- ========== 推理测试：类继承关系 ========== -->
+    <!-- 定义父类：所有医疗相关人员 -->
+    <owl:Class rdf:about="http://example.com/ontology#person"/>
+
+    <!-- doctor 是 person 的子类（医生也是人） -->
+    <owl:Class rdf:about="http://example.com/ontology#doctor">
+        <rdfs:subClassOf rdf:resource="http://example.com/ontology#person"/>
+    </owl:Class>
+
+    <!-- patient 是 person 的子类（病人也是人） -->
+    <owl:Class rdf:about="http://example.com/ontology#patient">
+        <rdfs:subClassOf rdf:resource="http://example.com/ontology#person"/>
+    </owl:Class>
+
+    <!-- infectious_disease 是 disease 的子类（传染病是一种疾病） -->
+    <owl:Class rdf:about="http://example.com/ontology#infectious_disease">
+        <rdfs:subClassOf rdf:resource="http://example.com/ontology#disease"/>
+    </owl:Class>
+
+    <!-- 定义 disease 类 -->
+    <owl:Class rdf:about="http://example.com/ontology#disease"/>
+
+    <!-- ========== 推理测试：等价类关系 ========== -->
+    <!-- 如果 doctor 和 physician 表示同一种事物 -->
+    <owl:Class rdf:about="http://example.com/ontology#doctor">
+        <owl:equivalentClass rdf:resource="http://example.com/ontology#physician"/>
+    </owl:Class>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 5.1.9.2018-12-12T06:37:32Z) https://github.com/owlcs/owlapi/ -->
+
+
