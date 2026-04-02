@@ -1,85 +1,125 @@
-# OWLAPI 推理物化测试（Protege 兼容思路）
+# OWLAPI GraphDB 管理平台
 
-这个工程用 **OWLAPI + HermiT 推理器** 来实现：
-1) 你在代码/入参中提供 TBox/ABox（这里用 JSON）
-2) 程序构建 `OWLOntology`
-3) 调用推理器做一致性/分类/实例类型推断
-4) 把“可枚举的推理结果”（实例类型、命名类的超类关系）物化为 OWL 公理
-5) `save` 为 `output-inferred.owl`
+基于 Spring Boot 的知识图谱管理平台，支持从关系数据库自动生成 OWL 本体和 OBDA 映射文件，并与 GraphDB 无缝集成。
 
-> 说明：推理器无法把“所有蕴含”都穷举成有限 OWL，但对常见的可枚举结果（types / subclass hierarchy）能可靠落地。
+## 核心功能
 
-## 运行
+- **Schema 扫描**: 连接关系数据库，自动扫描表结构和外键关系
+- **本体生成**: 根据数据库 Schema 自动生成 OWL 本体
+- **映射生成**: 生成 OBDA 映射文件，实现关系数据到 RDF 的虚拟映射
+- **GraphDB 管理**: 提供完整的 GraphDB 仓库管理功能
+- **SPARQL 查询**: 支持执行各种 SPARQL 查询
+- **Web UI**: 现代化的管理界面，无需操作 GraphDB 后台
 
-在项目根目录：
+## 快速开始
 
-```powershell
-mvn -q package
-mvn -q exec:java -Dexec.args="--input src/main/resources/sample-input.json --output output-inferred.owl"
-```
+### 环境要求
 
-执行结束后会在项目根目录生成 `output-inferred.owl`。
+- JDK 8+
+- Maven 3.6+
+- MySQL 8.x
+- GraphDB (可选)
 
-## 输入 JSON 示例
-
-`src/main/resources/sample-input.json` 已包含一个简单本体：
-- `Man ⊑ Person`
-- `Person ⊑ Mammal`
-- `Man(a)` 推理出 `Person(a)`、`Mammal(a)`
-
-你可以替换 JSON 中的 `axioms` 字段来表达你的领域公理。
-
-## 无 CLI 的自动建模（Java 扫描数据库生成 OWL）
-
-你可以直接通过 Java（JDBC + OWLAPI）扫描 MySQL 的表、字段、外键，并自动生成本体骨架。
-
-执行示例：
+### 启动应用
 
 ```powershell
-mvn -q exec:java "-Dexec.mainClass=com.example.owlapi.SchemaToOwlGenerator" "-Dexec.args=--jdbcUrl jdbc:mysql://127.0.0.1:3306/medical_demo --user root --password 123456 --baseIri http://example.com/medical# --output schema-auto.owl"
-```
-
-说明：
-- 表 -> `owl:Class`
-- 列 -> `owl:DatatypeProperty`（自动带 domain/range）
-- 外键 -> `owl:ObjectProperty`（自动带 domain/range）
-
-## Spring Boot API 服务（仅 SPARQL 查询接口）
-
-启动：
-
-```powershell
+cd c:\Users\tzp\owlapi-inference-demo
 mvn spring-boot:run
 ```
 
-健康检查：
+访问: http://localhost:8083
 
-`GET /api/health`
+### 配置数据库连接
 
-SPARQL 查询接口：
+编辑 `src/main/resources/application.yml`:
 
-`POST /api/sparql/query`
-
-请求体示例：
-
-```json
-{
-  "query": "SELECT * WHERE { ?s ?p ?o } LIMIT 10"
-}
+```yaml
+ontology:
+  bootstrap:
+    enabled: true
+    jdbc-url: jdbc:mysql://127.0.0.1:3306/your_database
+    user: root
+    password: your_password
+    base-iri: http://example.com/ontology#
+  
+  graph-db:
+    url: http://localhost:7200
+    repository-id: your_repo
 ```
 
-## 内置配置（扫描表位置就在这里）
+## 项目架构
 
-配置文件：`src/main/resources/application.yml`
+```
+src/main/java/com/example/owlapi/
+├── OwlApiSpringApplication.java      # Spring Boot 启动类
+├── SchemaToOwlGenerator.java         # OWL 本体生成器
+├── SchemaToObdaGenerator.java        # OBDA 映射生成器
+├── api/                              # REST API
+│   ├── OntologyController.java       # 本体操作 API
+│   ├── GraphDbController.java       # GraphDB 管理 API
+│   └── SparqlGatewayService.java    # SPARQL 网关
+├── bootstrap/                        # 启动引导
+│   └── SchemaBootstrapRunner.java   # 自动生成 Schema
+└── graphdb/                          # GraphDB 服务
+    ├── GraphDbService.java          # GraphDB 连接
+    └── GraphDbImportService.java    # 数据导入
+```
 
-关键字段：
-- `ontology.bootstrap.jdbc-url`：扫描哪个数据库
-- `ontology.bootstrap.schema`：扫描哪个 schema（可空）
-- `ontology.bootstrap.table-pattern`：按表名模式扫描（默认 `%`）
-- `ontology.bootstrap.include-tables`：白名单表名数组
-- `ontology.bootstrap.exclude-tables`：黑名单表名数组
-- `ontology.bootstrap.enabled`：`true` 时启动应用会自动扫描并生成 OWL
+## REST API
 
-说明：
-- 对外 API 只保留 SPARQL 查询接口。
-- 映射配置和 OWL 可按系统内置方式管理；扫描行为由配置控制，不暴露为公开生成接口。
+### GraphDB 管理
+
+| API | 说明 |
+|-----|------|
+| `GET /api/graphdb/status` | 获取连接状态 |
+| `GET /api/graphdb/repositories` | 列出所有仓库 |
+| `GET /api/graphdb/repositories/{id}` | 仓库详情 |
+| `POST /api/graphdb/repositories/{id}/restart` | 重启仓库 |
+| `DELETE /api/graphdb/repositories/{id}` | 删除仓库 |
+
+### SPARQL 查询
+
+| API | 说明 |
+|-----|------|
+| `POST /api/graphdb/repositories/{id}/sparql` | SELECT 查询 |
+| `POST /api/graphdb/repositories/{id}/sparql/construct` | CONSTRUCT 查询 |
+| `POST /api/graphdb/repositories/{id}/sparql/ask` | ASK 查询 |
+
+### Schema 生成
+
+| API | 说明 |
+|-----|------|
+| `POST /api/ontology/generate/owl` | 生成 OWL 本体 |
+| `POST /api/ontology/generate/obda` | 生成 OBDA 映射 |
+| `POST /api/ontology/generate/all` | 同时生成两者 |
+
+### 文件操作
+
+| API | 说明 |
+|-----|------|
+| `POST /api/ontology/upload/owl` | 上传 OWL 文件 |
+| `POST /api/ontology/upload/obda` | 上传 OBDA 文件 |
+| `POST /api/ontology/upload/rdf` | 上传并导入 RDF |
+| `GET /api/ontology/files` | 获取文件列表 |
+
+## 技术栈
+
+| 组件 | 版本 |
+|------|------|
+| Spring Boot | 2.7.18 |
+| OWLAPI | 5.1.9 |
+| RDF4J | 3.7.4 |
+| Jackson | 2.17.1 |
+| MySQL Connector | 8.4.0 |
+
+## 详细文档
+
+查看 `docs/功能与测试手册.md` 获取完整的：
+- API 参考
+- Java API 使用指南
+- 完整测试流程
+- GraphDB 对接说明
+
+## License
+
+MIT

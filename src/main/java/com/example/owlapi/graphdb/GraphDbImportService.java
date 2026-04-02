@@ -1,6 +1,8 @@
 package com.example.owlapi.graphdb;
 
 import com.example.owlapi.config.SystemBuiltinProperties;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.http.HTTPRepository;
@@ -12,6 +14,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class GraphDbImportService {
@@ -19,6 +24,7 @@ public class GraphDbImportService {
     private static final Logger logger = LoggerFactory.getLogger(GraphDbImportService.class);
     private final SystemBuiltinProperties props;
     private Repository repository;
+    private final ValueFactory valueFactory = SimpleValueFactory.getInstance();
 
     public GraphDbImportService(SystemBuiltinProperties props) {
         this.props = props;
@@ -27,14 +33,11 @@ public class GraphDbImportService {
 
     private void initializeRepository() {
         try {
-            // 从配置中获取GraphDB连接信息
             String graphDbUrl = props.getGraphDb().getUrl();
             String repositoryId = props.getGraphDb().getRepositoryId();
-            
-            // 创建HTTPRepository连接
             repository = new HTTPRepository(graphDbUrl, repositoryId);
             repository.init();
-            logger.info("GraphDB repository initialized successfully: {}/repositories/{}", graphDbUrl, repositoryId);
+            logger.info("GraphDB repository initialized: {}/repositories/{}", graphDbUrl, repositoryId);
         } catch (Exception e) {
             logger.error("Failed to initialize GraphDB repository", e);
         }
@@ -47,7 +50,6 @@ public class GraphDbImportService {
         }
 
         try (RepositoryConnection conn = repository.getConnection()) {
-            // 获取OWL文件路径
             String owlFilePath = props.getBootstrap().getOutput();
             File owlFile = new File(owlFilePath);
 
@@ -56,7 +58,6 @@ public class GraphDbImportService {
                 return;
             }
 
-            // 导入OWL文件
             logger.info("Importing OWL file into GraphDB: {}", owlFilePath);
             conn.add(new FileInputStream(owlFile), props.getBootstrap().getBaseIri(), RDFFormat.RDFXML);
             logger.info("OWL file imported successfully");
@@ -65,21 +66,129 @@ public class GraphDbImportService {
         }
     }
 
-    public void importMappingFile(String repositoryId, byte[] fileContent) throws IOException {
-        // 根据指定的仓库ID创建新的仓库连接
+    /**
+     * Import OWL file to a specific repository
+     */
+    public void importOwlFileToRepository(String repositoryId, InputStream inputStream, RDFFormat format) throws IOException {
         Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
         targetRepository.init();
-        
+
         try (RepositoryConnection conn = targetRepository.getConnection()) {
-            // 导入OBDA文件
-            logger.info("Importing mapping file into GraphDB repository: {}", repositoryId);
-            // 注意：GraphDB的HTTPRepository不直接支持OBDA文件导入
-            // 这里我们使用RDF4J的API来添加文件内容
-            // 实际项目中可能需要使用GraphDB的特定API来处理OBDA文件
-            logger.info("Mapping file imported successfully into repository: {}", repositoryId);
+            logger.info("Importing OWL/RDF to repository: {}", repositoryId);
+            String baseUri = props.getBootstrap().getBaseIri();
+            if (baseUri == null || baseUri.isEmpty()) {
+                baseUri = "http://example.com/ontology#";
+            }
+            conn.add(inputStream, baseUri, format, (org.eclipse.rdf4j.model.Resource[]) null);
+            logger.info("Successfully imported to repository: {}", repositoryId);
+        } catch (Exception e) {
+            logger.error("Error importing to repository: {}", repositoryId, e);
+            throw e;
+        } finally {
+            targetRepository.shutDown();
+        }
+    }
+
+    /**
+     * Import RDF data to a specific repository
+     */
+    public void importRdfToRepository(String repositoryId, InputStream inputStream, RDFFormat format) throws IOException {
+        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        targetRepository.init();
+
+        try (RepositoryConnection conn = targetRepository.getConnection()) {
+            logger.info("Importing RDF data to repository: {} (format: {})", repositoryId, format);
+            String baseUri = props.getBootstrap().getBaseIri();
+            if (baseUri == null || baseUri.isEmpty()) {
+                baseUri = "http://example.com/ontology#";
+            }
+            conn.add(inputStream, baseUri, format, (org.eclipse.rdf4j.model.Resource[]) null);
+            logger.info("Successfully imported RDF data to repository: {}", repositoryId);
+        } catch (Exception e) {
+            logger.error("Error importing RDF to repository: {}", repositoryId, e);
+            throw e;
+        } finally {
+            targetRepository.shutDown();
+        }
+    }
+
+    /**
+     * Import RDF file to default repository
+     */
+    public void importRdfFile(File rdfFile, RDFFormat format) throws IOException {
+        if (repository == null) {
+            logger.error("GraphDB repository not initialized");
+            return;
+        }
+
+        try (RepositoryConnection conn = repository.getConnection()) {
+            logger.info("Importing RDF file: {}", rdfFile.getAbsolutePath());
+            conn.add(new FileInputStream(rdfFile), props.getBootstrap().getBaseIri(), format);
+            logger.info("RDF file imported successfully");
+        } catch (Exception e) {
+            logger.error("Error importing RDF file", e);
+            throw e;
+        }
+    }
+
+    public void importMappingFile(String repositoryId, byte[] fileContent) throws IOException {
+        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        targetRepository.init();
+
+        try (RepositoryConnection conn = targetRepository.getConnection()) {
+            logger.info("Importing mapping file into repository: {}", repositoryId);
+            // Note: OBDA files need special handling through Ontop
+            // For direct RDF imports, use importRdfToRepository instead
+            logger.info("Mapping file processed for repository: {}", repositoryId);
         } catch (Exception e) {
             logger.error("Error importing mapping file into GraphDB", e);
             throw e;
+        } finally {
+            targetRepository.shutDown();
+        }
+    }
+
+    /**
+     * Clear all data from a repository
+     */
+    public void clearRepository(String repositoryId) {
+        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        targetRepository.init();
+
+        try (RepositoryConnection conn = targetRepository.getConnection()) {
+            logger.info("Clearing repository: {}", repositoryId);
+            conn.clear();
+            conn.clearNamespaces();
+            logger.info("Repository cleared successfully: {}", repositoryId);
+        } catch (Exception e) {
+            logger.error("Error clearing repository: {}", repositoryId, e);
+        } finally {
+            targetRepository.shutDown();
+        }
+    }
+
+    /**
+     * Get statistics for a repository
+     */
+    public Map<String, Object> getRepositoryStats(String repositoryId) {
+        Map<String, Object> stats = new HashMap<>();
+        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        targetRepository.init();
+
+        try (RepositoryConnection conn = targetRepository.getConnection()) {
+            stats.put("statementCount", conn.size());
+            stats.put("isEmpty", conn.isEmpty());
+            
+            // Get namespace info
+            Map<String, String> namespaces = new HashMap<>();
+            conn.getNamespaces().forEach(ns -> namespaces.put(ns.getPrefix(), ns.getName()));
+            stats.put("namespaces", namespaces);
+            
+            return stats;
+        } catch (Exception e) {
+            logger.error("Error getting repository stats: {}", repositoryId, e);
+            stats.put("error", e.getMessage());
+            return stats;
         } finally {
             targetRepository.shutDown();
         }

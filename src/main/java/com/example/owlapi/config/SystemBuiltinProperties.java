@@ -41,6 +41,7 @@ public class SystemBuiltinProperties {
     private List<String> excludeTables = new ArrayList<>();
     private String baseIri = "http://example.com/auto#";
     private String output = "schema-auto.owl";
+    private String obdaOutput = "schema-auto.obda";
     private String driverClass = "com.mysql.cj.jdbc.Driver";
 
     public boolean isEnabled() {
@@ -137,6 +138,14 @@ public class SystemBuiltinProperties {
 
     public void setDriverClass(String driverClass) {
       this.driverClass = driverClass;
+    }
+
+    public String getObdaOutput() {
+      return obdaOutput;
+    }
+
+    public void setObdaOutput(String obdaOutput) {
+      this.obdaOutput = obdaOutput;
     }
   }
 
