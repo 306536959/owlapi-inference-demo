@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>保存的查询 - Saved Queries</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--gray-50);
+            min-height: 100vh;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .header-left h1 {
+            font-size: 1.5rem;
+            color: var(--gray-800);
+        }
+        
+        .back-btn {
+            padding: 0.5rem 1rem;
+            background: var(--gray-100);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--gray-700);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+        
+        .back-btn:hover {
+            background: var(--gray-200);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .card-header h2 {
+            font-size: 1.125rem;
+            color: var(--gray-800);
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-info:hover {
+            opacity: 0.9;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        
+        .query-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .query-item {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+        
+        .query-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+        }
+        
+        .query-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        
+        .query-name {
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 1rem;
+        }
+        
+        .query-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .query-body {
+            background: var(--gray-50);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8125rem;
+            color: var(--gray-700);
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--gray-600);
+        }
+        
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.125rem;
+            color: var(--gray-800);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-600);
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+        
+        .modal-close:hover {
+            background: var(--gray-100);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-group textarea {
+            font-family: 'Monaco', 'Menlo', monospace;
+            resize: vertical;
+            min-height: 150px;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 2000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background: var(--success);
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <a href="index.html" class="back-btn">← 返回主页</a>
+            <h1>保存的查询</h1>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateModal()">+ 新建查询</button>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h2>已保存的 SPARQL 查询</h2>
+                <button class="btn btn-primary" onclick="loadQueries()" style="padding: 0.375rem 0.75rem;">
+                    ↻ 刷新
+                </button>
+            </div>
+            <div class="card-body">
+                <div id="queryList" class="query-list">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Create/Edit Modal -->
+    <div id="queryModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">新建查询</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="queryId">
+                <div class="form-group">
+                    <label for="queryName">查询名称 *</label>
+                    <input type="text" id="queryName" placeholder="例如: 获取所有类">
+                </div>
+                <div class="form-group">
+                    <label for="queryBody">SPARQL 查询语句 *</label>
+                    <textarea id="queryBody" placeholder="SELECT * WHERE { ?s ?p ?o } LIMIT 100"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal()" style="background: var(--gray-100); color: var(--gray-700);">取消</button>
+                <button class="btn btn-primary" onclick="saveQuery()">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Execute Modal -->
+    <div id="executeModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>执行查询</h3>
+                <button class="modal-close" onclick="closeExecuteModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="executeRepoId">选择仓库 *</label>
+                    <select id="executeRepoId" style="width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--gray-300); border-radius: 6px; font-size: 0.875rem;">
+                        <option value="">请选择仓库...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>查询内容</label>
+                    <textarea id="executeQueryBody" readonly style="background: var(--gray-50);"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>结果</label>
+                    <div id="executeResult" style="background: var(--gray-50); border-radius: 6px; padding: 0.75rem; max-height: 300px; overflow: auto; font-family: monospace; font-size: 0.8125rem; white-space: pre-wrap;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeExecuteModal()" style="background: var(--gray-100); color: var(--gray-700);">关闭</button>
+                <button class="btn btn-success" onclick="executeQuery()">▶ 执行</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Copy Link Modal -->
+    <div id="linkModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>复制查询链接</h3>
+                <button class="modal-close" onclick="closeLinkModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--gray-600); font-size: 0.875rem;">
+                    分享此链接，其他人可以访问此查询并直接执行
+                </p>
+                <div class="form-group">
+                    <label for="linkUrl">查询链接</label>
+                    <div id="linkUrl" class="link-display"></div>
+                    <button class="btn btn-primary" onclick="doCopyLink()" style="width: 100%;">📋 复制链接</button>
+                </div>
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label>使用说明</label>
+                    <ul style="font-size: 0.8125rem; color: var(--gray-600); padding-left: 1.25rem; line-height: 1.6;">
+                        <li>复制链接后发送给其他人</li>
+                        <li>对方打开链接会跳转到查询页面</li>
+                        <li>对方需要选择一个仓库来执行查询</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeLinkModal()" style="background: var(--gray-100); color: var(--gray-700);">关闭</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let queries = [];
+        let editingQuery = null;
+        let currentLinkQueryName = null;
+
+        document.getElementById('queryList').addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-q-action]');
+            if (!btn) return;
+            const idx = parseInt(btn.getAttribute('data-q-index'), 10);
+            if (Number.isNaN(idx) || idx < 0 || idx >= queries.length) return;
+            const q = queries[idx];
+            const name = q.name || q.queryName || '';
+            const body = q.body || q.queryBody || '';
+            const action = btn.getAttribute('data-q-action');
+            if (action === 'execute') openExecuteModal(name, body);
+            else if (action === 'link') copyQueryLink(name);
+            else if (action === 'edit') editQuery(name);
+            else if (action === 'delete') deleteQuery(name);
+        });
+
+        // Load saved queries
+        async function loadQueries() {
+            const listEl = document.getElementById('queryList');
+            listEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            try {
+                const response = await fetch('/api/graphdb/saved-queries');
+                const data = await response.json();
+                
+                // Show all queries (both GraphDB defaults and user-created)
+                queries = Array.isArray(data) ? data : [];
+                
+                renderQueries();
+
+                // Check URL params after loading
+                checkUrlParams();
+            } catch (error) {
+                console.error('Error loading queries:', error);
+                listEl.innerHTML = '<div class="empty-state"><p>加载失败: ' + error.message + '</p></div>';
+            }
+        }
+        
+        // Render query list
+        function renderQueries() {
+            const listEl = document.getElementById('queryList');
+            
+            if (queries.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <p>暂无保存的查询</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">点击右上角「新建查询」开始</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            listEl.innerHTML = queries.map((q, i) => `
+                <div class="query-item">
+                    <div class="query-item-header">
+                        <span class="query-name">${escapeHtml(q.name || q.queryName || '未命名')}</span>
+                        <div class="query-actions">
+                            <button type="button" class="btn btn-success btn-sm" data-q-action="execute" data-q-index="${i}">▶ 执行</button>
+                            <button type="button" class="btn btn-info btn-sm" data-q-action="link" data-q-index="${i}">🔗 复制链接</button>
+                            <button type="button" class="btn btn-primary btn-sm" data-q-action="edit" data-q-index="${i}">✎ 编辑</button>
+                            <button type="button" class="btn btn-danger btn-sm" data-q-action="delete" data-q-index="${i}">🗑 删除</button>
+                        </div>
+                    </div>
+                    <div class="query-body">${escapeHtml(q.body || q.queryBody || '')}</div>
+                </div>
+            `).join('');
+        }
+        
+        // Open create modal
+        function openCreateModal() {
+            editingQuery = null;
+            document.getElementById('modalTitle').textContent = '新建查询';
+            document.getElementById('queryId').value = '';
+            document.getElementById('queryName').value = '';
+            document.getElementById('queryBody').value = '';
+            document.getElementById('queryModal').classList.add('active');
+        }
+        
+        // Edit query
+        function editQuery(name) {
+            const query = queries.find(q => (q.name || q.queryName) === name);
+            if (!query) return;
+            
+            editingQuery = query;
+            document.getElementById('modalTitle').textContent = '编辑查询';
+            document.getElementById('queryId').value = name;
+            document.getElementById('queryName').value = name;
+            document.getElementById('queryBody').value = query.body || query.queryBody || '';
+            document.getElementById('queryModal').classList.add('active');
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('queryModal').classList.remove('active');
+            editingQuery = null;
+        }
+        
+        // Save query
+        async function saveQuery() {
+            const name = document.getElementById('queryName').value.trim();
+            const body = document.getElementById('queryBody').value.trim();
+            
+            if (!name || !body) {
+                showToast('请填写名称和查询语句', 'error');
+                return;
+            }
+            
+            const isUpdate = editingQuery !== null;
+            
+            // Build request data - for updates, include oldQueryName
+            let data;
+            if (isUpdate) {
+                const oldName = editingQuery.name || editingQuery.queryName;
+                data = { oldQueryName: oldName, name, body };
+            } else {
+                data = { name, body };
+            }
+            
+            try {
+                const url = '/api/graphdb/saved-queries';
+                const method = isUpdate ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    showToast(isUpdate ? '查询已更新' : '查询已保存', 'success');
+                    closeModal();
+                    loadQueries();
+                } else {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error || '保存失败');
+                }
+            } catch (error) {
+                console.error('Error saving query:', error);
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Delete query
+        async function deleteQuery(name) {
+            if (!confirm(`确定要删除查询「${name}」吗？`)) return;
+            
+            try {
+                const response = await fetch(`/api/graphdb/saved-queries?name=${encodeURIComponent(name)}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    showToast('查询已删除', 'success');
+                    loadQueries();
+                } else {
+                    throw new Error('删除失败');
+                }
+            } catch (error) {
+                console.error('Error deleting query:', error);
+                showToast(error.message, 'error');
+            }
+        }
+        
+        // Open execute modal
+        async function openExecuteModal(name, body) {
+            document.getElementById('executeQueryBody').value = body;
+            document.getElementById('executeResult').textContent = '';
+            
+            // Load repositories
+            const repoSelect = document.getElementById('executeRepoId');
+            repoSelect.innerHTML = '<option value="">加载中...</option>';
+            
+            try {
+                const response = await fetch('/api/graphdb/repositories');
+                const repos = await response.json();
+                
+                repoSelect.innerHTML = '<option value="">请选择仓库...</option>';
+                if (Array.isArray(repos)) {
+                    repos.filter(r => r.readable).forEach(repo => {
+                        repoSelect.innerHTML += `<option value="${repo.id}">${repo.title || repo.id}</option>`;
+                    });
+                }
+            } catch (error) {
+                repoSelect.innerHTML = '<option value="">加载失败</option>';
+            }
+            
+            document.getElementById('executeModal').classList.add('active');
+        }
+        
+        // Close execute modal
+        function closeExecuteModal() {
+            document.getElementById('executeModal').classList.remove('active');
+        }
+        
+        // Execute query
+        async function executeQuery() {
+            const repoId = document.getElementById('executeRepoId').value;
+            const query = document.getElementById('executeQueryBody').value.trim();
+            const resultEl = document.getElementById('executeResult');
+            
+            if (!repoId || !query) {
+                showToast('请选择仓库并确保查询不为空', 'error');
+                return;
+            }
+            
+            resultEl.textContent = '执行中...';
+            
+            try {
+                const response = await fetch(`/api/graphdb/repositories/${encodeURIComponent(repoId)}/sparql`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const raw = await response.text();
+                let data = {};
+                if (raw) {
+                    try {
+                        data = JSON.parse(raw);
+                    } catch (_) {
+                        data = { error: raw };
+                    }
+                }
+                
+                if (!response.ok) {
+                    resultEl.textContent = 'HTTP ' + response.status + ': ' + (data.error || raw || '请求失败');
+                    return;
+                }
+                
+                if (data.results) {
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                } else if (data.error) {
+                    resultEl.textContent = '错误: ' + data.error;
+                } else {
+                    resultEl.textContent = JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                resultEl.textContent = '执行失败: ' + error.message;
+            }
+        }
+        
+        // Show toast
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy query link
+        function copyQueryLink(name) {
+            currentLinkQueryName = name;
+            const baseUrl = window.location.origin + window.location.pathname.replace('saved-queries.html', 'index.html');
+            const linkUrl = baseUrl + '?query=' + encodeURIComponent(name);
+
+            document.getElementById('linkUrl').textContent = linkUrl;
+            document.getElementById('linkModal').classList.add('active');
+        }
+
+        // Do copy link
+        async function doCopyLink() {
+            const linkUrl = document.getElementById('linkUrl').textContent;
+            try {
+                await navigator.clipboard.writeText(linkUrl);
+                showToast('链接已复制到剪贴板', 'success');
+                closeLinkModal();
+            } catch (err) {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = linkUrl;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('链接已复制到剪贴板', 'success');
+                closeLinkModal();
+            }
+        }
+
+        // Close link modal
+        function closeLinkModal() {
+            document.getElementById('linkModal').classList.remove('active');
+            currentLinkQueryName = null;
+        }
+
+        // Check URL params on page load
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryName = urlParams.get('query');
+
+            if (queryName) {
+                // Find the query
+                const query = queries.find(q => (q.name || q.queryName) === queryName);
+                if (query) {
+                    const body = query.body || query.queryBody || '';
+                    openExecuteModal(queryName, body);
+                } else {
+                    // Query not found, load first
+                    loadQueries().then(() => {
+                        const q = queries.find(q => (q.name || q.queryName) === queryName);
+                        if (q) {
+                            const body = q.body || q.queryBody || '';
+                            openExecuteModal(queryName, body);
+                        } else {
+                            showToast('未找到查询: ' + queryName, 'error');
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Close modal on overlay click
+        document.getElementById('queryModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) closeModal();
+        });
+        
+        document.getElementById('executeModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) closeExecuteModal();
+        });
+
+        document.getElementById('linkModal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) closeLinkModal();
+        });
+        
+        // Load queries on page load
+        loadQueries();
+    </script>
+</body>
+</html>

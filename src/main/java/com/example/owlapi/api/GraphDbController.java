@@ -403,9 +403,13 @@ public class GraphDbController {
      */
     @PostMapping("/repositories/{repoId}/sparql")
     public ResponseEntity<Object> executeSparqlQuery(@PathVariable String repoId, 
-                                                      @RequestParam("query") String query,
-                                                      @RequestParam(value = "format", defaultValue = "json") String format) {
+                                                      @RequestBody Map<String, String> request) {
         try {
+            String query = request.get("query");
+            if (query == null || query.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Query parameter is required"));
+            }
+            
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
             
@@ -434,10 +438,17 @@ public class GraphDbController {
      */
     @PostMapping("/repositories/{repoId}/sparql/construct")
     public ResponseEntity<Map<String, Object>> executeSparqlConstruct(@PathVariable String repoId, 
-                                                                       @RequestParam("query") String query,
-                                                                       @RequestParam(value = "format", defaultValue = "turtle") String format) {
+                                                                       @RequestBody Map<String, String> request) {
         Map<String, Object> response = new HashMap<>();
         try {
+            String query = request.get("query");
+            if (query == null || query.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Query parameter is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+            String format = request.getOrDefault("format", "turtle");
+            
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
             
@@ -472,9 +483,16 @@ public class GraphDbController {
      */
     @PostMapping("/repositories/{repoId}/sparql/ask")
     public ResponseEntity<Map<String, Object>> executeSparqlAsk(@PathVariable String repoId, 
-                                                                  @RequestParam("query") String query) {
+                                                                 @RequestBody Map<String, String> request) {
         Map<String, Object> response = new HashMap<>();
         try {
+            String query = request.get("query");
+            if (query == null || query.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Query parameter is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
             
@@ -496,6 +514,140 @@ public class GraphDbController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error executing SPARQL ASK", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // ========== Saved Queries APIs ==========
+
+    /**
+     * List all saved queries
+     */
+    @GetMapping("/saved-queries")
+    public ResponseEntity<Object> listSavedQueries(@RequestParam(required = false) String name) {
+        try {
+            String graphDbUrl = props.getGraphDb().getUrl();
+            String url = graphDbUrl + "/rest/sparql/saved-queries" + (name != null ? "?name=" + name : "");
+            
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
+            
+            // GraphDB returns { "value": [...], "Count": N } - extract "value"
+            Object body = response.getBody();
+            if (body instanceof Map) {
+                Map<?, ?> map = (Map<?, ?>) body;
+                if (map.containsKey("value")) {
+                    return ResponseEntity.ok(map.get("value"));
+                }
+            }
+            return ResponseEntity.ok(body);
+        } catch (Exception e) {
+            logger.error("Error listing saved queries", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Create a new saved query
+     */
+    @PostMapping("/saved-queries")
+    public ResponseEntity<Map<String, Object>> createSavedQuery(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String graphDbUrl = props.getGraphDb().getUrl();
+            String url = graphDbUrl + "/rest/sparql/saved-queries";
+            
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            
+            org.springframework.http.HttpEntity<Map<String, String>> requestEntity = 
+                new org.springframework.http.HttpEntity<>(request, headers);
+            
+            org.springframework.http.ResponseEntity<String> resp = restTemplate.postForEntity(url, requestEntity, String.class);
+            
+            if (resp.getStatusCode().is2xxSuccessful()) {
+                response.put("success", true);
+                response.put("message", "Saved query created successfully");
+            } else {
+                response.put("success", false);
+                response.put("message", resp.getStatusCode().getReasonPhrase());
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error creating saved query", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Update an existing saved query.
+     * oldQueryName must be a URL query parameter for GraphDB; encoded once with URLEncoder (not UriComponentsBuilder).
+     */
+    @PutMapping("/saved-queries")
+    public ResponseEntity<Map<String, Object>> updateSavedQuery(@RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String graphDbUrl = props.getGraphDb().getUrl();
+            String oldQueryName = request.get("oldQueryName");
+            if (oldQueryName == null || oldQueryName.isEmpty()) {
+                oldQueryName = request.get("name");
+            }
+            if (oldQueryName == null || oldQueryName.isEmpty()) {
+                response.put("success", false);
+                response.put("error", "oldQueryName is required for update");
+                return ResponseEntity.badRequest().body(response);
+            }
+            // Encode exactly once (spaces -> %20), not via UriComponentsBuilder which double-encodes
+            String encodedName = java.net.URLEncoder.encode(oldQueryName, java.nio.charset.StandardCharsets.UTF_8.toString());
+            String url = graphDbUrl + "/rest/sparql/saved-queries?oldQueryName=" + encodedName;
+
+            Map<String, String> graphDbRequest = new HashMap<>();
+            graphDbRequest.put("name", request.get("name"));
+            graphDbRequest.put("body", request.get("body"));
+
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+
+            org.springframework.http.HttpEntity<Map<String, String>> requestEntity =
+                    new org.springframework.http.HttpEntity<>(graphDbRequest, headers);
+
+            restTemplate.put(url, requestEntity);
+
+            response.put("success", true);
+            response.put("message", "Saved query updated successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error updating saved query", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Delete a saved query
+     */
+    @DeleteMapping("/saved-queries")
+    public ResponseEntity<Map<String, Object>> deleteSavedQuery(@RequestParam String name) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String graphDbUrl = props.getGraphDb().getUrl();
+            String url = graphDbUrl + "/rest/sparql/saved-queries?name=" + name;
+            
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            restTemplate.delete(url);
+            
+            response.put("success", true);
+            response.put("message", "Saved query deleted successfully");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error deleting saved query", e);
             response.put("success", false);
             response.put("error", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);

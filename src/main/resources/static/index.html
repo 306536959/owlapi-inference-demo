@@ -501,6 +501,10 @@
             <i class="fas fa-file-alt"></i>
             <span>文件管理</span>
         </div>
+        <div class="nav-item" data-section="saved-queries" onclick="window.open('saved-queries.html', '_blank')">
+            <i class="fas fa-bookmark"></i>
+            <span>保存的查询</span>
+        </div>
     </nav>
 
     <!-- Main Content -->
@@ -1000,7 +1004,7 @@ LIMIT 100</textarea>
         // Global State
         let currentRepos = [];
         let startTime = Date.now();
-        
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initNavigation();
@@ -1008,7 +1012,58 @@ LIMIT 100</textarea>
             loadDashboardData();
             loadRepositories();
             loadGeneratedFiles();
+            
+            // Check URL params for shared query links
+            checkUrlParams();
         });
+        
+        // Handle URL parameters for shared query links
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryName = urlParams.get('query');
+            const repoId = urlParams.get('repo');
+            
+            if (queryName) {
+                // Switch to query section
+                switchSection('query');
+                
+                // Load the saved query
+                fetch('/api/graphdb/saved-queries')
+                    .then(r => r.json())
+                    .then(queries => {
+                        const query = (queries || []).find(q => 
+                            (q.name || q.queryName) === queryName
+                        );
+                        
+                        if (query) {
+                            const body = query.body || query.queryBody || '';
+                            document.getElementById('sparqlQuery').value = body;
+                            
+                            // If repo is specified, select it and optionally auto-execute
+                            if (repoId) {
+                                document.getElementById('queryRepoSelect').value = repoId;
+                                // Auto-execute after a short delay to ensure repo is loaded
+                                setTimeout(() => {
+                                    if (document.getElementById('queryRepoSelect').value === repoId) {
+                                        executeQuery();
+                                    }
+                                }, 500);
+                            } else {
+                                toast('info', '已加载查询 "' + queryName + '"，请选择仓库后执行');
+                            }
+                        } else {
+                            toast('error', '未找到查询: ' + queryName);
+                        }
+                        
+                        // Clean up URL
+                        const newUrl = window.location.pathname;
+                        window.history.replaceState({}, document.title, newUrl);
+                    })
+                    .catch(err => {
+                        toast('error', '加载查询失败: ' + err.message);
+                    });
+            }
+        }
         
         // Navigation
         function initNavigation() {
@@ -1471,8 +1526,8 @@ LIMIT 100</textarea>
             showLoading();
             fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'query=' + encodeURIComponent(query)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: query })
             })
             .then(r => r.json())
             .then(data => {
