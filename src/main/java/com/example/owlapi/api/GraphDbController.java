@@ -204,6 +204,91 @@ public class GraphDbController {
     }
 
     /**
+     * Get repository config files list
+     */
+    @GetMapping("/repositories/{repoId}/files")
+    public ResponseEntity<Map<String, Object>> getRepoFiles(@PathVariable String repoId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String uploadDir = System.getProperty("user.dir") + "/uploads/" + repoId + "/";
+            File repoDir = new File(uploadDir);
+            
+            Map<String, Object> files = new HashMap<>();
+            
+            if (repoDir.exists() && repoDir.isDirectory()) {
+                File[] filesInDir = repoDir.listFiles();
+                if (filesInDir != null) {
+                    for (File f : filesInDir) {
+                        String type = getRepoFileType(f.getName());
+                        if (type != null) {
+                            Map<String, Object> fileInfo = new HashMap<>();
+                            fileInfo.put("name", f.getName());
+                            fileInfo.put("size", f.length());
+                            fileInfo.put("lastModified", f.lastModified());
+                            files.put(type, fileInfo);
+                        }
+                    }
+                }
+            }
+            
+            response.put("success", true);
+            response.put("files", files);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error getting repo files", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    /**
+     * Get repository config file content
+     */
+    @GetMapping("/repositories/{repoId}/files/{fileName}/content")
+    public ResponseEntity<Map<String, Object>> getRepoFileContent(@PathVariable String repoId, @PathVariable String fileName) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String filePath = System.getProperty("user.dir") + "/uploads/" + repoId + "/" + fileName;
+            File file = new File(filePath);
+            
+            if (!file.exists()) {
+                response.put("success", false);
+                response.put("message", "File not found: " + fileName);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            
+            String content = new String(java.nio.file.Files.readAllBytes(file.toPath()));
+            response.put("success", true);
+            response.put("fileName", fileName);
+            response.put("content", content);
+            response.put("size", file.length());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error reading repo file", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    private String getRepoFileType(String fileName) {
+        // Check ttl config file first (more specific)
+        if (fileName.endsWith(".ttl") && fileName.contains("config")) {
+            return "ttl";
+        }
+        // Then check standard ontology files
+        if (fileName.endsWith(".owl") || fileName.endsWith(".rdf") || fileName.endsWith(".ttl")) {
+            return "owl";
+        } else if (fileName.endsWith(".obda")) {
+            return "obda";
+        } else if (fileName.equals("config.properties")) {
+            return "properties";
+        }
+        return null;
+    }
+
+    /**
      * Create Ontop virtual repository
      */
     @PostMapping("/repositories/ontop")

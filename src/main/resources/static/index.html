@@ -501,10 +501,6 @@
             <i class="fas fa-file-alt"></i>
             <span>文件管理</span>
         </div>
-        <div class="nav-item" data-section="upload">
-            <i class="fas fa-upload"></i>
-            <span>上传文件</span>
-        </div>
     </nav>
 
     <!-- Main Content -->
@@ -587,9 +583,6 @@
                                 <button class="btn btn-outline-success" onclick="switchSection('query')">
                                     <i class="fas fa-search me-2"></i>SPARQL查询
                                 </button>
-                                <button class="btn btn-outline-info" onclick="switchSection('upload')">
-                                    <i class="fas fa-upload me-2"></i>上传文件
-                                </button>
                                 <button class="btn btn-outline-warning" onclick="refreshAll()">
                                     <i class="fas fa-sync-alt me-2"></i>刷新数据
                                 </button>
@@ -609,70 +602,33 @@
                             <span><i class="fas fa-magic me-2"></i>数据库Schema生成OWL/OBDA</span>
                         </div>
                         <div class="card-body">
-                            <ul class="nav nav-tabs mb-4" id="schemaTabs">
-                                <li class="nav-item">
-                                    <a class="nav-link active" data-bs-toggle="tab" href="#tab-db-config">数据库配置</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-bs-toggle="tab" href="#tab-options">高级选项</a>
-                                </li>
-                            </ul>
-                            
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="tab-db-config">
-                                    <div class="form-section">
-                                        <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
-                                        <div class="row">
-                                            <div class="col-md-12 mb-3">
-                                                <label class="form-label">JDBC URL</label>
-                                                <input type="text" class="form-control" id="schemaJdbcUrl" 
-                                                       placeholder="jdbc:mysql://localhost:3306/your_database">
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">用户名</label>
-                                                <input type="text" class="form-control" id="schemaUser" placeholder="root">
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">密码</label>
-                                                <input type="password" class="form-control" id="schemaPassword" placeholder="******">
-                                            </div>
-                                            <div class="col-md-4 mb-3">
-                                                <label class="form-label">驱动类</label>
-                                                <input type="text" class="form-control" id="schemaDriver" value="com.mysql.cj.jdbc.Driver">
-                                            </div>
-                                        </div>
+                            <div class="form-section">
+                                <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="form-label">JDBC URL</label>
+                                        <input type="text" class="form-control" id="schemaJdbcUrl" 
+                                               placeholder="jdbc:mysql://localhost:3306/your_database">
                                     </div>
-                                </div>
-                                
-                                <div class="tab-pane fade" id="tab-options">
-                                    <div class="form-section">
-                                        <h5><i class="fas fa-cog text-primary"></i>生成选项</h5>
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Catalog</label>
-                                                <input type="text" class="form-control" id="schemaCatalog" placeholder="(留空使用默认)">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Schema</label>
-                                                <input type="text" class="form-control" id="schemaSchema" placeholder="(留空使用默认)">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">表名过滤 (SQL LIKE)</label>
-                                                <input type="text" class="form-control" id="schemaTablePattern" value="%">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">Base IRI</label>
-                                                <input type="text" class="form-control" id="schemaBaseIri" value="http://example.com/ontology#">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">包含的表 (逗号分隔)</label>
-                                                <input type="text" class="form-control" id="schemaIncludeTables" placeholder="(留空包含所有)">
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label">排除的表 (逗号分隔)</label>
-                                                <input type="text" class="form-control" id="schemaExcludeTables" placeholder="">
-                                            </div>
-                                        </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">用户名</label>
+                                        <input type="text" class="form-control" id="schemaUser" placeholder="root">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">密码</label>
+                                        <input type="password" class="form-control" id="schemaPassword" placeholder="******">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">驱动类</label>
+                                        <input type="text" class="form-control" id="schemaDriver" value="com.mysql.cj.jdbc.Driver">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Base IRI</label>
+                                        <input type="text" class="form-control" id="schemaBaseIri" value="http://example.com/ontology#">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">表名过滤 (SQL LIKE)</label>
+                                        <input type="text" class="form-control" id="schemaTablePattern" value="%">
                                     </div>
                                 </div>
                             </div>
@@ -858,84 +814,6 @@ LIMIT 100</textarea>
             </div>
         </section>
 
-        <!-- File Upload Section -->
-        <section id="section-upload" class="section">
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <span><i class="fas fa-upload me-2"></i>上传OWL文件</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">选择仓库 (可选)</label>
-                                <select class="form-select" id="uploadOwlRepo">
-                                    <option value="">-- 不导入到仓库 --</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">OWL/RDF文件</label>
-                                <input type="file" class="form-control" id="owlFile" accept=".owl,.rdf,.ttl">
-                            </div>
-                            <button class="btn btn-primary w-100" onclick="uploadOwlFile()">
-                                <i class="fas fa-upload me-2"></i>上传并导入
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <span><i class="fas fa-file-alt me-2"></i>上传OBDA文件</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">OBDA映射文件</label>
-                                <input type="file" class="form-control" id="obdaFile" accept=".obda">
-                            </div>
-                            <button class="btn btn-success w-100" onclick="uploadObdaFile()">
-                                <i class="fas fa-upload me-2"></i>上传
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <span><i class="fas fa-database me-2"></i>导入RDF数据</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">目标仓库</label>
-                                <select class="form-select" id="importRdfRepo">
-                                    <option value="">-- 选择仓库 --</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">RDF数据文件</label>
-                                <input type="file" class="form-control" id="rdfFile" accept=".rdf,.owl,.ttl,.nt,.n3">
-                            </div>
-                            <button class="btn btn-info w-100" onclick="uploadRdfFile()">
-                                <i class="fas fa-upload me-2"></i>上传并导入
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4">
-                    <div class="card">
-                        <div class="card-header">
-                            <span><i class="fas fa-history me-2"></i>上传历史</span>
-                        </div>
-                        <div class="card-body">
-                            <div id="uploadHistory">
-                                <p class="text-muted text-center">暂无上传记录</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- Create Repository Modal -->
@@ -1011,6 +889,112 @@ LIMIT 100</textarea>
         </div>
     </div>
 
+    <!-- Repository Detail Modal -->
+    <div class="modal fade" id="repoDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-folder-open me-2"></i>仓库详情 - <span id="repoDetailTitle">-</span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <span class="badge bg-secondary me-2" id="repoDetailId">-</span>
+                        <span class="badge" id="repoDetailStatus">-</span>
+                    </div>
+                    
+                    <ul class="nav nav-tabs mb-3" id="repoDetailTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#repo-tab-files">配置文件</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#repo-tab-info">仓库信息</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="repo-tab-files">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <span><i class="fas fa-file-code me-2"></i>OWL本体</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="repoOwlFile">
+                                                <p class="text-muted text-center">加载中...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <span><i class="fas fa-file-alt me-2"></i>OBDA映射</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="repoObdaFile">
+                                                <p class="text-muted text-center">加载中...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <span><i class="fas fa-cog me-2"></i>数据库配置</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div id="repoPropertiesFile">
+                                                <p class="text-muted text-center">加载中...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <label class="form-label">文件预览</label>
+                                <div class="code-editor bg-dark text-light p-3 rounded" id="repoFilePreview" style="min-height: 300px; max-height: 400px; overflow: auto;">
+                                    <pre class="mb-0 text-light">选择左侧文件查看内容...</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="repo-tab-info">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th width="30%">仓库ID</th>
+                                            <td id="infoRepoId">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>标题</th>
+                                            <td id="infoRepoTitle">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>类型</th>
+                                            <td id="infoRepoType">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>状态</th>
+                                            <td id="infoRepoReadable">-</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" onclick="openRepoInQuery()">
+                        <i class="fas fa-search me-2"></i>查询此仓库
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Global State
@@ -1048,8 +1032,7 @@ LIMIT 100</textarea>
                 'schema': 'Schema生成',
                 'repositories': '仓库管理',
                 'query': 'SPARQL查询',
-                'files': '文件管理',
-                'upload': '上传文件'
+                'files': '文件管理'
             };
             document.getElementById('pageTitle').textContent = titles[section] || '仪表盘';
         }
@@ -1172,14 +1155,12 @@ LIMIT 100</textarea>
         }
         
         function updateRepoSelects(repos) {
-            const selects = ['queryRepoSelect', 'uploadOwlRepo', 'importRdfRepo'];
+            const selects = ['queryRepoSelect'];
             selects.forEach(id => {
                 const select = document.getElementById(id);
                 if (select) {
                     const currentVal = select.value;
-                    select.innerHTML = id === 'uploadOwlRepo' 
-                        ? '<option value="">-- 不导入到仓库 --</option>'
-                        : '<option value="">-- 选择仓库 --</option>';
+                    select.innerHTML = '<option value="">-- 选择仓库 --</option>';
                     repos.forEach(repo => {
                         select.innerHTML += `<option value="${repo.id}">${repo.title || repo.id}</option>`;
                     });
@@ -1257,10 +1238,143 @@ LIMIT 100</textarea>
         }
         
         function viewRepo(repoId) {
-            switchSection('query');
-            document.getElementById('queryRepoSelect').value = repoId;
+            // Find repo info
+            const repo = currentRepos.find(r => r.id === repoId);
+            if (!repo) {
+                toast('error', '仓库未找到');
+                return;
+            }
+            
+            // Fill basic info
+            document.getElementById('repoDetailTitle').textContent = repo.title || repo.id;
+            document.getElementById('repoDetailId').textContent = repo.id;
+            document.getElementById('repoDetailStatus').textContent = repo.readable ? '在线' : '离线';
+            document.getElementById('repoDetailStatus').className = 'badge ' + (repo.readable ? 'bg-success' : 'bg-warning');
+            
+            // Fill info tab
+            document.getElementById('infoRepoId').textContent = repo.id || '-';
+            document.getElementById('infoRepoTitle').textContent = repo.title || '-';
+            document.getElementById('infoRepoType').textContent = repo.type || '-';
+            document.getElementById('infoRepoReadable').innerHTML = repo.readable 
+                ? '<span class="badge bg-success">在线</span>' 
+                : '<span class="badge bg-warning">离线</span>';
+            
+            // Store current repo id for query button
+            window.currentRepoDetailId = repoId;
+            
+            // Load repo files
+            loadRepoFiles(repoId);
+            
+            // Reset preview
+            document.getElementById('repoFilePreview').innerHTML = '<pre class="mb-0 text-light">选择左侧文件查看内容...</pre>';
+            
+            // Show modal
+            new bootstrap.Modal(document.getElementById('repoDetailModal')).show();
         }
         
+        function loadRepoFiles(repoId) {
+            const placeholders = ['owl', 'obda', 'properties'];
+            placeholders.forEach(type => {
+                document.getElementById('repo' + type.charAt(0).toUpperCase() + type.slice(1) + 'File')
+                    .innerHTML = '<p class="text-muted text-center">加载中...</p>';
+            });
+            
+            fetch('/api/graphdb/repositories/' + repoId + '/files')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data.success) {
+                        placeholders.forEach(type => {
+                            document.getElementById('repo' + type.charAt(0).toUpperCase() + type.slice(1) + 'File')
+                                .innerHTML = '<p class="text-danger text-center">加载失败</p>';
+                        });
+                        return;
+                    }
+                    
+                    const files = data.files;
+                    
+                    // OWL file
+                    if (files.owl) {
+                        document.getElementById('repoOwlFile').innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">${formatSize(files.owl.size)}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewRepoFile('${repoId}', '${files.owl.name}')">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('repoOwlFile').innerHTML = '<p class="text-muted text-center">无文件</p>';
+                    }
+                    
+                    // OBDA file
+                    if (files.obda) {
+                        document.getElementById('repoObdaFile').innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">${formatSize(files.obda.size)}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-success" onclick="viewRepoFile('${repoId}', '${files.obda.name}')">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('repoObdaFile').innerHTML = '<p class="text-muted text-center">无文件</p>';
+                    }
+                    
+                    // Properties file
+                    if (files.properties) {
+                        document.getElementById('repoPropertiesFile').innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted">${formatSize(files.properties.size)}</small>
+                                </div>
+                                <button class="btn btn-sm btn-outline-info" onclick="viewRepoFile('${repoId}', '${files.properties.name}')">
+                                    <i class="fas fa-eye"></i> 查看
+                                </button>
+                            </div>
+                        `;
+                    } else {
+                        document.getElementById('repoPropertiesFile').innerHTML = '<p class="text-muted text-center">无文件</p>';
+                    }
+                })
+                .catch(err => {
+                    placeholders.forEach(type => {
+                        document.getElementById('repo' + type.charAt(0).toUpperCase() + type.slice(1) + 'File')
+                            .innerHTML = '<p class="text-danger text-center">加载失败</p>';
+                    });
+                });
+        }
+        
+        function viewRepoFile(repoId, fileName) {
+            const preview = document.getElementById('repoFilePreview');
+            preview.innerHTML = '<pre class="mb-0 text-light"><i class="fas fa-spinner fa-spin"></i> 加载中...</pre>';
+            
+            fetch('/api/graphdb/repositories/' + repoId + '/files/' + encodeURIComponent(fileName) + '/content')
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        preview.innerHTML = '<pre class="mb-0 text-light">' + escapeHtml(data.content) + '</pre>';
+                    } else {
+                        preview.innerHTML = '<pre class="text-danger mb-0">' + escapeHtml(data.message) + '</pre>';
+                    }
+                })
+                .catch(err => {
+                    preview.innerHTML = '<pre class="text-danger mb-0">加载失败: ' + escapeHtml(err.message) + '</pre>';
+                });
+        }
+        
+        function openRepoInQuery() {
+            if (window.currentRepoDetailId) {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('repoDetailModal'));
+                modal.hide();
+                switchSection('query');
+                document.getElementById('queryRepoSelect').value = window.currentRepoDetailId;
+            }
+        }
+
         // Schema Generation
         function generateSchema(type) {
             const request = {
@@ -1268,12 +1382,8 @@ LIMIT 100</textarea>
                 user: document.getElementById('schemaUser').value,
                 password: document.getElementById('schemaPassword').value,
                 driverClass: document.getElementById('schemaDriver').value,
-                catalog: document.getElementById('schemaCatalog').value || null,
-                schema: document.getElementById('schemaSchema').value || null,
                 tablePattern: document.getElementById('schemaTablePattern').value,
-                baseIri: document.getElementById('schemaBaseIri').value,
-                includeTables: document.getElementById('schemaIncludeTables').value || null,
-                excludeTables: document.getElementById('schemaExcludeTables').value || null
+                baseIri: document.getElementById('schemaBaseIri').value
             };
             
             if (!request.jdbcUrl || !request.user) {
@@ -1296,18 +1406,35 @@ LIMIT 100</textarea>
                 if (data.success) {
                     let html = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>' + data.message + '</div>';
                     html += '<div class="card"><div class="card-body">';
+                    
+                    // Stats
                     if (data.owl) {
-                        html += '<p><strong>OWL文件:</strong> ' + data.owlFile + '</p>';
-                        html += '<p>表: ' + data.owl.tableCount + ' | 属性: ' + data.owl.dataPropertyCount + ' | 关系: ' + data.owl.objectPropertyCount + '</p>';
+                        html += '<p class="mb-2"><strong>OWL本体统计:</strong> 表: ' + data.owl.tableCount + ' | 数据属性: ' + data.owl.dataPropertyCount + ' | 对象属性: ' + data.owl.objectPropertyCount + '</p>';
                     }
                     if (data.obdaFile) {
-                        html += '<p><strong>OBDA文件:</strong> ' + data.obdaFile + '</p>';
-                        html += '<p><strong>配置文件:</strong> ' + data.propertiesFile + '</p>';
+                        html += '<p class="mb-3"><strong>OBDA映射已生成</strong></p>';
                     }
+                    
+                    // Download buttons
+                    html += '<h6><i class="fas fa-download me-2"></i>下载文件</h6>';
+                    html += '<div class="d-flex flex-wrap gap-2 mt-2">';
+                    if (data.owlFile) {
+                        html += '<a href="/api/ontology/files/' + data.owlFile + '/download" class="btn btn-outline-primary btn-sm">';
+                        html += '<i class="fas fa-file-code me-1"></i>下载 OWL (' + data.owlFile + ')</a>';
+                    }
+                    if (data.obdaFile) {
+                        html += '<a href="/api/ontology/files/' + data.obdaFile + '/download" class="btn btn-outline-success btn-sm">';
+                        html += '<i class="fas fa-file-alt me-1"></i>下载 OBDA (' + data.obdaFile + ')</a>';
+                    }
+                    if (data.propertiesFile) {
+                        html += '<a href="/api/ontology/files/' + data.propertiesFile + '/download" class="btn btn-outline-info btn-sm">';
+                        html += '<i class="fas fa-cog me-1"></i>下载配置 (' + data.propertiesFile + ')</a>';
+                    }
+                    html += '</div>';
+                    
                     html += '</div></div>';
                     resultDiv.innerHTML = html;
                     resultDiv.style.display = 'block';
-                    loadGeneratedFiles();
                 } else {
                     resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>' + data.message + '</div>';
                     resultDiv.style.display = 'block';
@@ -1494,122 +1621,6 @@ WHERE {
                 .catch(err => {
                     document.getElementById('filePreview').innerHTML = '<pre class="text-danger">加载失败: ' + err.message + '</pre>';
                 });
-        }
-        
-        // Upload
-        function uploadOwlFile() {
-            const fileInput = document.getElementById('owlFile');
-            const repoId = document.getElementById('uploadOwlRepo').value;
-            
-            if (!fileInput.files.length) {
-                toast('error', '请选择文件');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            if (repoId) formData.append('repositoryId', repoId);
-            
-            showLoading();
-            fetch('/api/ontology/upload/owl', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        toast('success', '上传成功');
-                        fileInput.value = '';
-                        addUploadHistory(data.fileName);
-                    } else {
-                        toast('error', data.message || '上传失败');
-                    }
-                })
-                .catch(err => {
-                    hideLoading();
-                    toast('error', '上传失败: ' + err.message);
-                });
-        }
-        
-        function uploadObdaFile() {
-            const fileInput = document.getElementById('obdaFile');
-            
-            if (!fileInput.files.length) {
-                toast('error', '请选择文件');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            
-            showLoading();
-            fetch('/api/ontology/upload/obda', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        toast('success', '上传成功');
-                        fileInput.value = '';
-                        addUploadHistory(data.fileName);
-                        loadGeneratedFiles();
-                    } else {
-                        toast('error', data.message || '上传失败');
-                    }
-                })
-                .catch(err => {
-                    hideLoading();
-                    toast('error', '上传失败: ' + err.message);
-                });
-        }
-        
-        function uploadRdfFile() {
-            const fileInput = document.getElementById('rdfFile');
-            const repoId = document.getElementById('importRdfRepo').value;
-            
-            if (!fileInput.files.length) {
-                toast('error', '请选择文件');
-                return;
-            }
-            if (!repoId) {
-                toast('error', '请选择目标仓库');
-                return;
-            }
-            
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('repositoryId', repoId);
-            
-            showLoading();
-            fetch('/api/ontology/upload/rdf', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        toast('success', '上传并导入成功');
-                        fileInput.value = '';
-                        addUploadHistory(data.fileName + ' -> ' + repoId);
-                        loadRepositories();
-                    } else {
-                        toast('error', data.message || '导入失败');
-                    }
-                })
-                .catch(err => {
-                    hideLoading();
-                    toast('error', '导入失败: ' + err.message);
-                });
-        }
-        
-        function addUploadHistory(info) {
-            const container = document.getElementById('uploadHistory');
-            const time = new Date().toLocaleTimeString();
-            const entry = document.createElement('div');
-            entry.className = 'd-flex justify-content-between align-items-center py-2 border-bottom';
-            entry.innerHTML = `
-                <small>${info}</small>
-                <small class="text-muted">${time}</small>
-            `;
-            if (container.querySelector('.text-muted')) {
-                container.innerHTML = '';
-            }
-            container.insertBefore(entry, container.firstChild);
         }
         
         // Utilities

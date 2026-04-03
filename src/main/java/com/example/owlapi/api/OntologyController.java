@@ -6,9 +6,7 @@ import com.example.owlapi.SchemaToOwlGenerator;
 import com.example.owlapi.ObdaGeneratorArgs;
 import com.example.owlapi.SchemaToObdaGenerator;
 import com.example.owlapi.config.SystemBuiltinProperties;
-import com.example.owlapi.graphdb.GraphDbImportService;
 import com.example.owlapi.graphdb.GraphDbService;
-import org.eclipse.rdf4j.rio.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -34,14 +32,11 @@ public class OntologyController {
 
     private static final Logger logger = LoggerFactory.getLogger(OntologyController.class);
     private final SystemBuiltinProperties props;
-    private final GraphDbImportService graphDbImportService;
     private final GraphDbService graphDbService;
 
     public OntologyController(SystemBuiltinProperties props, 
-                                GraphDbImportService graphDbImportService,
                                 GraphDbService graphDbService) {
         this.props = props;
-        this.graphDbImportService = graphDbImportService;
         this.graphDbService = graphDbService;
     }
 
@@ -56,6 +51,17 @@ public class OntologyController {
         try {
             logger.info("Generating OWL ontology from database schema...");
 
+            // Create temp directory
+            String workDir = System.getProperty("user.dir");
+            File tempDir = new File(workDir + "/temp");
+            if (!tempDir.exists()) {
+                tempDir.mkdirs();
+            }
+            
+            // Generate unique filename with timestamp
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String outputFile = "schema_" + timestamp + ".owl";
+            
             SchemaGeneratorArgs args = new SchemaGeneratorArgs();
             args.jdbcUrl = request.jdbcUrl;
             args.user = request.user;
@@ -65,7 +71,7 @@ public class OntologyController {
             args.schema = request.schema;
             args.tablePattern = request.tablePattern != null ? request.tablePattern : "%";
             args.baseIri = request.baseIri != null ? request.baseIri : "http://example.com/ontology#";
-            args.output = request.outputFile != null ? request.outputFile : "schema-auto.owl";
+            args.output = "temp/" + outputFile;
             
             if (request.includeTables != null) {
                 args.includeTables = Stream.of(request.includeTables.split(","))
@@ -84,6 +90,7 @@ public class OntologyController {
 
             response.put("success", true);
             response.put("message", "OWL ontology generated successfully");
+            response.put("owlFile", outputFile);
             response.put("outputPath", result.outputPath);
             response.put("tableCount", result.tableCount);
             response.put("dataPropertyCount", result.dataPropertyCount);
@@ -107,6 +114,17 @@ public class OntologyController {
         try {
             logger.info("Generating OBDA mapping file from database schema...");
 
+            // Create temp directory
+            String workDir = System.getProperty("user.dir");
+            File tempDir = new File(workDir + "/temp");
+            if (!tempDir.exists()) {
+                tempDir.mkdirs();
+            }
+            
+            // Generate unique filename with timestamp
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String outputFile = "mapping_" + timestamp;
+            
             ObdaGeneratorArgs args = new ObdaGeneratorArgs();
             args.jdbcUrl = request.jdbcUrl;
             args.user = request.user;
@@ -116,7 +134,7 @@ public class OntologyController {
             args.schema = request.schema;
             args.tablePattern = request.tablePattern != null ? request.tablePattern : "%";
             args.baseIri = request.baseIri != null ? request.baseIri : "http://example.com/ontology#";
-            args.output = request.obdaOutputFile != null ? request.obdaOutputFile : "schema-auto.obda";
+            args.output = "temp/" + outputFile;
             
             if (request.includeTables != null) {
                 args.includeTables = Stream.of(request.includeTables.split(","))
@@ -135,8 +153,8 @@ public class OntologyController {
 
             response.put("success", true);
             response.put("message", "OBDA mapping file generated successfully");
-            response.put("obdaFile", args.output + ".obda");
-            response.put("propertiesFile", args.output + ".properties");
+            response.put("obdaFile", outputFile + ".obda");
+            response.put("propertiesFile", outputFile + ".obda.properties");
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -156,6 +174,18 @@ public class OntologyController {
         try {
             logger.info("Generating both OWL ontology and OBDA mapping file...");
 
+            // Create temp directory
+            String workDir = System.getProperty("user.dir");
+            File tempDir = new File(workDir + "/temp");
+            if (!tempDir.exists()) {
+                tempDir.mkdirs();
+            }
+            
+            // Generate unique filename with timestamp
+            String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+            String owlFileName = "schema_" + timestamp + ".owl";
+            String obdaFileName = "mapping_" + timestamp;
+
             // Generate OWL
             SchemaGeneratorArgs owlArgs = new SchemaGeneratorArgs();
             owlArgs.jdbcUrl = request.jdbcUrl;
@@ -166,7 +196,7 @@ public class OntologyController {
             owlArgs.schema = request.schema;
             owlArgs.tablePattern = request.tablePattern != null ? request.tablePattern : "%";
             owlArgs.baseIri = request.baseIri != null ? request.baseIri : "http://example.com/ontology#";
-            owlArgs.output = request.outputFile != null ? request.outputFile : "schema-auto.owl";
+            owlArgs.output = "temp/" + owlFileName;
             
             if (request.includeTables != null) {
                 owlArgs.includeTables = Stream.of(request.includeTables.split(","))
@@ -193,7 +223,7 @@ public class OntologyController {
             obdaArgs.schema = request.schema;
             obdaArgs.tablePattern = request.tablePattern != null ? request.tablePattern : "%";
             obdaArgs.baseIri = request.baseIri != null ? request.baseIri : "http://example.com/ontology#";
-            obdaArgs.output = request.obdaOutputFile != null ? request.obdaOutputFile : "schema-auto.obda";
+            obdaArgs.output = "temp/" + obdaFileName;
             
             if (request.includeTables != null) {
                 obdaArgs.includeTables = Stream.of(request.includeTables.split(","))
@@ -212,7 +242,7 @@ public class OntologyController {
 
             response.put("success", true);
             response.put("message", "Both OWL and OBDA files generated successfully");
-            response.put("owlFile", owlResult.outputPath);
+            response.put("owlFile", owlFileName);
             
             Map<String, Object> owlInfo = new HashMap<>();
             owlInfo.put("tableCount", owlResult.tableCount);
@@ -220,172 +250,14 @@ public class OntologyController {
             owlInfo.put("objectPropertyCount", owlResult.objectPropertyCount);
             response.put("owl", owlInfo);
             
-            response.put("obdaFile", obdaArgs.output + ".obda");
-            response.put("propertiesFile", obdaArgs.output + ".properties");
+            response.put("obdaFile", obdaFileName + ".obda");
+            response.put("propertiesFile", obdaFileName + ".obda.properties");
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error generating OWL and OBDA files", e);
             response.put("success", false);
             response.put("message", "Error generating files: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    // ========== File Upload APIs ==========
-
-    /**
-     * Upload OWL ontology file
-     */
-    @PostMapping(value = "/upload/owl", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> uploadOwl(@RequestParam("file") MultipartFile file,
-                                                          @RequestParam(value = "repositoryId", required = false) String repositoryId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            if (file.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "File is empty");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null || (!originalFilename.endsWith(".owl") && !originalFilename.endsWith(".rdf") && !originalFilename.endsWith(".ttl"))) {
-                response.put("success", false);
-                response.put("message", "File must be .owl, .rdf, or .ttl format");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            String uploadDir = System.getProperty("user.dir") + "/uploads/";
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String savedPath = uploadDir + "ontology." + (originalFilename.endsWith(".ttl") ? "ttl" : "owl");
-            file.transferTo(new File(savedPath));
-
-            response.put("success", true);
-            response.put("message", "OWL file uploaded successfully");
-            response.put("filePath", savedPath);
-            response.put("fileName", file.getOriginalFilename());
-            response.put("fileSize", file.getSize());
-
-            // Optionally import to repository
-            if (repositoryId != null && !repositoryId.isEmpty()) {
-                try {
-                    graphDbImportService.importOwlFileToRepository(repositoryId, new FileInputStream(new File(savedPath)), 
-                        originalFilename.endsWith(".ttl") ? RDFFormat.TURTLE : RDFFormat.RDFXML);
-                    response.put("imported", true);
-                    response.put("repositoryId", repositoryId);
-                } catch (Exception e) {
-                    logger.warn("Failed to import OWL to repository: {}", e.getMessage());
-                    response.put("imported", false);
-                    response.put("importError", e.getMessage());
-                }
-            }
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error uploading OWL file", e);
-            response.put("success", false);
-            response.put("message", "Error uploading file: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * Upload OBDA mapping file
-     */
-    @PostMapping(value = "/upload/obda", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> uploadObda(@RequestParam("file") MultipartFile file) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            if (file.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "File is empty");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            if (originalFilename == null || !originalFilename.endsWith(".obda")) {
-                response.put("success", false);
-                response.put("message", "File must be .obda format");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            String uploadDir = System.getProperty("user.dir") + "/uploads/";
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String savedPath = uploadDir + "mapping.obda";
-            file.transferTo(new File(savedPath));
-
-            response.put("success", true);
-            response.put("message", "OBDA file uploaded successfully");
-            response.put("filePath", savedPath);
-            response.put("fileName", file.getOriginalFilename());
-            response.put("fileSize", file.getSize());
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error uploading OBDA file", e);
-            response.put("success", false);
-            response.put("message", "Error uploading file: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * Upload RDF/TTL data file for import
-     */
-    @PostMapping(value = "/upload/rdf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> uploadRdf(@RequestParam("file") MultipartFile file,
-                                                           @RequestParam("repositoryId") String repositoryId) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            if (file.isEmpty()) {
-                response.put("success", false);
-                response.put("message", "File is empty");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            String originalFilename = file.getOriginalFilename();
-            RDFFormat format = RDFFormat.RDFXML;
-            if (originalFilename != null) {
-                if (originalFilename.endsWith(".ttl")) {
-                    format = RDFFormat.TURTLE;
-                } else if (originalFilename.endsWith(".nt")) {
-                    format = RDFFormat.NTRIPLES;
-                } else if (originalFilename.endsWith(".n3")) {
-                    format = RDFFormat.N3;
-                }
-            }
-
-            String uploadDir = System.getProperty("user.dir") + "/uploads/";
-            File dir = new File(uploadDir);
-            if (!dir.exists()) {
-                dir.mkdirs();
-            }
-
-            String savedPath = uploadDir + "data." + (format == RDFFormat.TURTLE ? "ttl" : format == RDFFormat.NTRIPLES ? "nt" : "rdf");
-            file.transferTo(new File(savedPath));
-
-            // Import to repository
-            graphDbImportService.importRdfToRepository(repositoryId, new FileInputStream(new File(savedPath)), format);
-
-            response.put("success", true);
-            response.put("message", "RDF file uploaded and imported successfully");
-            response.put("filePath", savedPath);
-            response.put("fileName", file.getOriginalFilename());
-            response.put("repositoryId", repositoryId);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error uploading RDF file", e);
-            response.put("success", false);
-            response.put("message", "Error uploading/importing file: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -500,6 +372,41 @@ public class OntologyController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Download generated file
+     */
+    @GetMapping("/files/{fileName}/download")
+    public ResponseEntity<org.springframework.core.io.Resource> downloadFile(@PathVariable String fileName) {
+        try {
+            String workDir = System.getProperty("user.dir");
+            // First try temp directory
+            File file = new File(workDir + "/temp", fileName);
+            
+            if (!file.exists()) {
+                // Fallback to root directory
+                file = new File(workDir, fileName);
+            }
+            
+            if (!file.exists()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            org.springframework.core.io.FileSystemResource resource = new org.springframework.core.io.FileSystemResource(file);
+            String contentType = fileName.endsWith(".owl") ? "application/xml" :
+                                 fileName.endsWith(".obda") ? "text/plain" :
+                                 fileName.endsWith(".properties") ? "text/plain" :
+                                 "application/octet-stream";
+            
+            return ResponseEntity.ok()
+                    .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                    .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            logger.error("Error downloading file", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
