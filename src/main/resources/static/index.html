@@ -505,6 +505,10 @@
             <i class="fas fa-bookmark"></i>
             <span>保存的查询</span>
         </div>
+        <div class="nav-item" onclick="window.open('ontology-editor.html', '_blank')">
+            <i class="fas fa-pencil-ruler"></i>
+            <span>本体编辑器</span>
+        </div>
     </nav>
 
     <!-- Main Content -->
@@ -820,6 +824,44 @@ LIMIT 100</textarea>
 
     </main>
 
+    <!-- Upload Ontology Files Modal (Update existing repo) -->
+    <div class="modal fade" id="uploadOntologyModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-upload me-2"></i>上传新本体文件 - <span id="uploadOntologyRepoId"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning" style="font-size:0.85rem;">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        上传新文件将覆盖仓库现有的 OWL 和 OBDA 文件。覆盖后系统将自动重启仓库使更改生效。
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">OWL 本体文件</label>
+                        <input type="file" class="form-control" id="uploadOwlFile" accept=".owl,.rdf,.ttl">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">OBDA 映射文件</label>
+                        <input type="file" class="form-control" id="uploadObdaFile" accept=".obda">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="uploadRestartCheck" checked>
+                        <label class="form-check-label" for="uploadRestartCheck">
+                            上传后自动重启仓库
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-success" onclick="uploadOntologyFiles()">
+                        <i class="fas fa-upload me-2"></i>上传并覆盖
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Create Repository Modal -->
     <div class="modal fade" id="createRepoModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -990,6 +1032,9 @@ LIMIT 100</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-success" onclick="showUploadOntologyModal()">
+                        <i class="fas fa-upload me-2"></i>上传新本体文件
+                    </button>
                     <button type="button" class="btn btn-outline-primary" onclick="openRepoInQuery()">
                         <i class="fas fa-search me-2"></i>查询此仓库
                     </button>
@@ -1178,6 +1223,9 @@ LIMIT 100</textarea>
                     <td>
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="viewRepo('${repo.id}')">
                             <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info me-1" onclick="window.open('ontology-editor.html?repoId=${repo.id}', '_blank')">
+                            <i class="fas fa-pencil-ruler"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-warning me-1" onclick="restartRepo('${repo.id}')">
                             <i class="fas fa-redo"></i>
@@ -1428,6 +1476,49 @@ LIMIT 100</textarea>
                 switchSection('query');
                 document.getElementById('queryRepoSelect').value = window.currentRepoDetailId;
             }
+        }
+
+        function showUploadOntologyModal() {
+            if (!window.currentRepoDetailId) return;
+            document.getElementById('uploadOntologyRepoId').textContent = window.currentRepoDetailId;
+            document.getElementById('uploadOwlFile').value = '';
+            document.getElementById('uploadObdaFile').value = '';
+            document.getElementById('uploadRestartCheck').checked = true;
+            bootstrap.Modal.getInstance(document.getElementById('repoDetailModal')).hide();
+            new bootstrap.Modal(document.getElementById('uploadOntologyModal')).show();
+        }
+
+        function uploadOntologyFiles() {
+            const repoId = window.currentRepoDetailId;
+            const owlFile = document.getElementById('uploadOwlFile').files[0];
+            const obdaFile = document.getElementById('uploadObdaFile').files[0];
+            const autoRestart = document.getElementById('uploadRestartCheck').checked;
+
+            if (!owlFile && !obdaFile) {
+                toast('error', '请至少选择一个文件上传');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('repoId', repoId);
+            if (owlFile) formData.append('owlFile', owlFile);
+            if (obdaFile) formData.append('obdaFile', obdaFile);
+            formData.append('autoRestart', autoRestart);
+
+            showLoading();
+            fetch('/api/ontology/editor/upload', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('uploadOntologyModal')).hide();
+                        toast('success', data.message || '文件上传成功');
+                        loadRepositories();
+                    } else {
+                        toast('error', data.error || '上传失败');
+                    }
+                })
+                .catch(err => { hideLoading(); toast('error', err.message); });
         }
 
         // Schema Generation

@@ -399,6 +399,37 @@ public class GraphDbController {
     // ========== SPARQL Query APIs ==========
 
     /**
+     * Execute SPARQL SELECT query (GET, for browser convenience)
+     */
+    @GetMapping("/repositories/{repoId}/sparql")
+    public ResponseEntity<Object> executeSparqlQueryGet(@PathVariable String repoId,
+                                                        @RequestParam String query) {
+        try {
+            if (query == null || query.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Query is required"));
+            }
+            String graphDbUrl = props.getGraphDb().getUrl();
+            String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
+
+            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
+            org.springframework.util.MultiValueMap<String, String> body = new org.springframework.util.LinkedMultiValueMap<>();
+            body.add("query", query);
+            body.add("format", "application/sparql-results+json");
+            org.springframework.http.HttpEntity<org.springframework.util.MultiValueMap<String, String>> requestEntity =
+                    new org.springframework.http.HttpEntity<>(body, headers);
+
+            org.springframework.http.ResponseEntity<Object> response = restTemplate.postForEntity(sparqlUrl, requestEntity, Object.class);
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            logger.error("Error executing SPARQL GET query", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    /**
      * Execute SPARQL SELECT query
      */
     @PostMapping("/repositories/{repoId}/sparql")
