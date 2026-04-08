@@ -29,19 +29,12 @@ mvn spring-boot:run
 
 访问: http://localhost:8083
 
-### 配置数据库连接
+### 配置 GraphDB 连接
 
 编辑 `src/main/resources/application.yml`:
 
 ```yaml
 ontology:
-  bootstrap:
-    enabled: true
-    jdbc-url: jdbc:mysql://127.0.0.1:3306/your_database
-    user: root
-    password: your_password
-    base-iri: http://example.com/ontology#
-  
   graph-db:
     url: http://localhost:7200
     repository-id: your_repo
@@ -58,8 +51,6 @@ src/main/java/com/example/owlapi/
 │   ├── OntologyController.java       # 本体操作 API
 │   ├── GraphDbController.java       # GraphDB 管理 API
 │   └── SparqlGatewayService.java    # SPARQL 网关
-├── bootstrap/                        # 启动引导
-│   └── SchemaBootstrapRunner.java   # 自动生成 Schema
 └── graphdb/                          # GraphDB 服务
     ├── GraphDbService.java          # GraphDB 连接
     └── GraphDbImportService.java    # 数据导入
@@ -100,7 +91,6 @@ src/main/java/com/example/owlapi/
 | `POST /api/ontology/upload/owl` | 上传 OWL 文件 |
 | `POST /api/ontology/upload/obda` | 上传 OBDA 文件 |
 | `POST /api/ontology/upload/rdf` | 上传并导入 RDF |
-| `GET /api/ontology/files` | 获取文件列表 |
 
 ## 技术栈
 

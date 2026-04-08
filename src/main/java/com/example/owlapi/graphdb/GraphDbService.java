@@ -32,7 +32,13 @@ public class GraphDbService {
             String repositoryId = props.getGraphDb().getRepositoryId();
             
             // 创建HTTPRepository连接
-            repository = new HTTPRepository(graphDbUrl, repositoryId);
+            HTTPRepository httpRepository = new HTTPRepository(graphDbUrl, repositoryId);
+            String username = props.getGraphDb().getUsername();
+            String password = props.getGraphDb().getPassword();
+            if (username != null && !username.trim().isEmpty()) {
+                httpRepository.setUsernameAndPassword(username, password == null ? "" : password);
+            }
+            repository = httpRepository;
             repository.init();
             logger.info("GraphDB repository initialized successfully: {}/repositories/{}", graphDbUrl, repositoryId);
         } catch (Exception e) {

@@ -16,11 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -40,7 +38,74 @@ public class OntologyController {
         this.graphDbService = graphDbService;
     }
 
+    private String normalizeJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null) return null;
+        String trimmed = jdbcUrl.trim();
+        if (!trimmed.startsWith("jdbc:mysql:")) return trimmed;
+
+        String[] parts = trimmed.split("\\?", 2);
+        String base = parts[0];
+        Map<String, String> query = new HashMap<>();
+        if (parts.length > 1 && parts[1] != null && !parts[1].isEmpty()) {
+            for (String pair : parts[1].split("&")) {
+                if (pair.isEmpty()) continue;
+                String[] kv = pair.split("=", 2);
+                query.put(kv[0], kv.length > 1 ? kv[1] : "");
+            }
+        }
+        // Force override to avoid existing small timeout values (e.g. 20000ms)
+        query.put("connectTimeout", "600000");
+        query.put("socketTimeout", "600000");
+        query.put("tcpKeepAlive", "true");
+        query.put("allowPublicKeyRetrieval", "true");
+        query.put("useSSL", "false");
+        query.put("serverTimezone", "Asia/Shanghai");
+
+        StringBuilder sb = new StringBuilder(base).append("?");
+        boolean first = true;
+        for (Map.Entry<String, String> e : query.entrySet()) {
+            if (!first) sb.append("&");
+            sb.append(e.getKey()).append("=").append(e.getValue());
+            first = false;
+        }
+        return sb.toString();
+    }
+
     // ========== Schema Generation APIs ==========
+
+    @PostMapping(value = "/datasource/test", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> testDataSource(@RequestBody SchemaGenRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        long start = System.currentTimeMillis();
+        try {
+            if (request.jdbcUrl == null || request.jdbcUrl.trim().isEmpty()
+                    || request.user == null || request.user.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "jdbcUrl and user are required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            String driverClass = request.driverClass != null && !request.driverClass.trim().isEmpty()
+                    ? request.driverClass
+                    : "com.mysql.cj.jdbc.Driver";
+            Class.forName(driverClass);
+            String jdbcUrl = normalizeJdbcUrl(request.jdbcUrl);
+            try (Connection conn = DriverManager.getConnection(jdbcUrl, request.user, request.password == null ? "" : request.password)) {
+                response.put("success", true);
+                response.put("message", "数据库连接成功");
+                response.put("valid", conn.isValid(3));
+                response.put("jdbcUrl", jdbcUrl);
+                response.put("elapsedMs", System.currentTimeMillis() - start);
+                return ResponseEntity.ok(response);
+            }
+        } catch (Exception e) {
+            logger.error("Error testing data source connection", e);
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            response.put("elapsedMs", System.currentTimeMillis() - start);
+            return ResponseEntity.ok(response);
+        }
+    }
 
     /**
      * Generate OWL ontology from database schema
@@ -63,7 +128,7 @@ public class OntologyController {
             String outputFile = "schema_" + timestamp + ".owl";
             
             SchemaGeneratorArgs args = new SchemaGeneratorArgs();
-            args.jdbcUrl = request.jdbcUrl;
+            args.jdbcUrl = normalizeJdbcUrl(request.jdbcUrl);
             args.user = request.user;
             args.password = request.password;
             args.driverClass = request.driverClass != null ? request.driverClass : "com.mysql.cj.jdbc.Driver";
@@ -126,7 +191,7 @@ public class OntologyController {
             String outputFile = "mapping_" + timestamp;
             
             ObdaGeneratorArgs args = new ObdaGeneratorArgs();
-            args.jdbcUrl = request.jdbcUrl;
+            args.jdbcUrl = normalizeJdbcUrl(request.jdbcUrl);
             args.user = request.user;
             args.password = request.password;
             args.driverClass = request.driverClass != null ? request.driverClass : "com.mysql.cj.jdbc.Driver";
@@ -188,7 +253,7 @@ public class OntologyController {
 
             // Generate OWL
             SchemaGeneratorArgs owlArgs = new SchemaGeneratorArgs();
-            owlArgs.jdbcUrl = request.jdbcUrl;
+            owlArgs.jdbcUrl = normalizeJdbcUrl(request.jdbcUrl);
             owlArgs.user = request.user;
             owlArgs.password = request.password;
             owlArgs.driverClass = request.driverClass != null ? request.driverClass : "com.mysql.cj.jdbc.Driver";
@@ -215,7 +280,7 @@ public class OntologyController {
 
             // Generate OBDA
             ObdaGeneratorArgs obdaArgs = new ObdaGeneratorArgs();
-            obdaArgs.jdbcUrl = request.jdbcUrl;
+            obdaArgs.jdbcUrl = normalizeJdbcUrl(request.jdbcUrl);
             obdaArgs.user = request.user;
             obdaArgs.password = request.password;
             obdaArgs.driverClass = request.driverClass != null ? request.driverClass : "com.mysql.cj.jdbc.Driver";
@@ -262,122 +327,8 @@ public class OntologyController {
         }
     }
 
-    // ========== File Download/View APIs ==========
+    // ========== File Download API ==========
 
-    /**
-     * Get generated files list
-     */
-    @GetMapping("/files")
-    public ResponseEntity<Map<String, Object>> getGeneratedFiles() {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            String workDir = System.getProperty("user.dir");
-            File uploadsDir = new File(workDir + "/uploads");
-            File rootDir = new File(workDir);
-            
-            Map<String, Object> files = new HashMap<>();
-            
-            // Check generated files
-            File owlFile = new File(rootDir, "schema-auto.owl");
-            if (owlFile.exists()) {
-                Map<String, Object> owlInfo = new HashMap<>();
-                owlInfo.put("name", owlFile.getName());
-                owlInfo.put("path", owlFile.getAbsolutePath());
-                owlInfo.put("size", owlFile.length());
-                owlInfo.put("lastModified", owlFile.lastModified());
-                files.put("owl", owlInfo);
-            }
-            
-            File obdaFile = new File(rootDir, "schema-auto.obda.obda");
-            if (!obdaFile.exists()) {
-                obdaFile = new File(rootDir, "schema-auto.obda");
-            }
-            if (obdaFile.exists()) {
-                Map<String, Object> obdaInfo = new HashMap<>();
-                obdaInfo.put("name", obdaFile.getName());
-                obdaInfo.put("path", obdaFile.getAbsolutePath());
-                obdaInfo.put("size", obdaFile.length());
-                obdaInfo.put("lastModified", obdaFile.lastModified());
-                files.put("obda", obdaInfo);
-            }
-            
-            File propsFile = new File(rootDir, "schema-auto.obda.properties");
-            if (propsFile.exists()) {
-                Map<String, Object> propsInfo = new HashMap<>();
-                propsInfo.put("name", propsFile.getName());
-                propsInfo.put("path", propsFile.getAbsolutePath());
-                propsInfo.put("size", propsFile.length());
-                propsInfo.put("lastModified", propsFile.lastModified());
-                files.put("properties", propsInfo);
-            }
-            
-            // List upload files
-            if (uploadsDir.exists()) {
-                File[] uploadFiles = uploadsDir.listFiles();
-                if (uploadFiles != null) {
-                    List<Map<String, Object>> uploadList = new java.util.ArrayList<>();
-                    for (File f : uploadFiles) {
-                        Map<String, Object> fileInfo = new HashMap<>();
-                        fileInfo.put("name", f.getName());
-                        fileInfo.put("path", f.getAbsolutePath());
-                        fileInfo.put("size", f.length());
-                        fileInfo.put("lastModified", f.lastModified());
-                        uploadList.add(fileInfo);
-                    }
-                    files.put("uploads", uploadList);
-                }
-            }
-            
-            response.put("success", true);
-            response.put("files", files);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error getting file list", e);
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * Read file content
-     */
-    @GetMapping("/files/{fileName}/content")
-    public ResponseEntity<Map<String, Object>> getFileContent(@PathVariable String fileName) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            String workDir = System.getProperty("user.dir");
-            File file = new File(workDir, fileName);
-            
-            if (!file.exists()) {
-                // Try uploads directory
-                file = new File(workDir + "/uploads", fileName);
-            }
-            
-            if (!file.exists()) {
-                response.put("success", false);
-                response.put("message", "File not found: " + fileName);
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-            }
-            
-            String content = new String(Files.readAllBytes(file.toPath()));
-            
-            response.put("success", true);
-            response.put("fileName", file.getName());
-            response.put("content", content);
-            response.put("size", file.length());
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            logger.error("Error reading file content", e);
-            response.put("success", false);
-            response.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-        }
-    }
-
-    /**
-     * Download generated file
-     */
     @GetMapping("/files/{fileName}/download")
     public ResponseEntity<org.springframework.core.io.Resource> downloadFile(@PathVariable String fileName) {
         try {
@@ -426,4 +377,5 @@ public class OntologyController {
         public String outputFile;
         public String obdaOutputFile;
     }
+
 }

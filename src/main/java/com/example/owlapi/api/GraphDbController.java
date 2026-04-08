@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,51 @@ public class GraphDbController {
         this.graphDbService = graphDbService;
     }
 
+    private org.springframework.web.client.RestTemplate createRestTemplate() {
+        org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+        String username = props.getGraphDb().getUsername();
+        String password = props.getGraphDb().getPassword();
+        if (username != null && !username.trim().isEmpty()) {
+            restTemplate.getInterceptors().add((request, body, execution) -> {
+                request.getHeaders().setBasicAuth(username, password == null ? "" : password);
+                return execution.execute(request, body);
+            });
+        }
+        return restTemplate;
+    }
+
+    private String normalizeJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null) return null;
+        String trimmed = jdbcUrl.trim();
+        if (!trimmed.startsWith("jdbc:mysql:")) return trimmed;
+
+        String[] parts = trimmed.split("\\?", 2);
+        String base = parts[0];
+        Map<String, String> query = new HashMap<>();
+        if (parts.length > 1 && parts[1] != null && !parts[1].isEmpty()) {
+            for (String pair : parts[1].split("&")) {
+                if (pair.isEmpty()) continue;
+                String[] kv = pair.split("=", 2);
+                query.put(kv[0], kv.length > 1 ? kv[1] : "");
+            }
+        }
+        query.put("connectTimeout", "600000");
+        query.put("socketTimeout", "600000");
+        query.put("tcpKeepAlive", "true");
+        query.put("allowPublicKeyRetrieval", "true");
+        query.put("useSSL", "false");
+        query.put("serverTimezone", "Asia/Shanghai");
+
+        StringBuilder sb = new StringBuilder(base).append("?");
+        boolean first = true;
+        for (Map.Entry<String, String> e : query.entrySet()) {
+            if (!first) sb.append("&");
+            sb.append(e.getKey()).append("=").append(e.getValue());
+            first = false;
+        }
+        return sb.toString();
+    }
+
     // ========== Repository Management APIs ==========
 
     /**
@@ -43,7 +89,7 @@ public class GraphDbController {
         Map<String, Object> response = new HashMap<>();
         try {
             String graphDbUrl = props.getGraphDb().getUrl();
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.ResponseEntity<String> resp = restTemplate.getForEntity(graphDbUrl + "/rest/locations", String.class);
             
             response.put("success", true);
@@ -69,7 +115,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String listReposUrl = graphDbUrl + "/rest/repositories";
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.ResponseEntity<Object> response = restTemplate.getForEntity(listReposUrl, Object.class);
             
             return ResponseEntity.ok(response.getBody());
@@ -88,7 +134,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String repoDetailsUrl = graphDbUrl + "/rest/repositories/" + repoId;
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.ResponseEntity<Object> response = restTemplate.getForEntity(repoDetailsUrl, Object.class);
             
             return ResponseEntity.ok(response.getBody());
@@ -107,7 +153,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String repoSizeUrl = graphDbUrl + "/rest/repositories/" + repoId + "/size";
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.ResponseEntity<Object> response = restTemplate.getForEntity(repoSizeUrl, Object.class);
             
             return ResponseEntity.ok(response.getBody());
@@ -141,7 +187,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String restartUrl = graphDbUrl + "/rest/repositories/" + repoId + "/restart";
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.ResponseEntity<String> resp = restTemplate.postForEntity(restartUrl, null, String.class);
             
             if (resp.getStatusCode().is2xxSuccessful()) {
@@ -170,7 +216,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String deleteUrl = graphDbUrl + "/rest/repositories/" + repoId;
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             restTemplate.delete(deleteUrl);
             
             response.put("success", true);
@@ -299,8 +345,10 @@ public class GraphDbController {
             @RequestParam("dbUser") String dbUser,
             @RequestParam("dbPassword") String dbPassword,
             @RequestParam("dbDriver") String dbDriver,
-            @RequestParam("owlFile") MultipartFile owlFile,
-            @RequestParam("obdaFile") MultipartFile obdaFile,
+            @RequestParam(value = "owlFile", required = false) MultipartFile owlFile,
+            @RequestParam(value = "obdaFile", required = false) MultipartFile obdaFile,
+            @RequestParam(value = "generatedOwlFile", required = false) String generatedOwlFile,
+            @RequestParam(value = "generatedObdaFile", required = false) String generatedObdaFile,
             @RequestParam("baseIri") String baseIri) {
         
         Map<String, Object> response = new HashMap<>();
@@ -314,15 +362,35 @@ public class GraphDbController {
             }
             
             File owlDest = new File(uploadDir + "ontology.owl");
-            owlFile.transferTo(owlDest);
-            logger.debug("OWL file saved: {}", owlDest.getAbsolutePath());
-            
             File obdaDest = new File(uploadDir + "mapping.obda");
-            obdaFile.transferTo(obdaDest);
+            boolean hasUploadFiles = owlFile != null && !owlFile.isEmpty() && obdaFile != null && !obdaFile.isEmpty();
+            boolean hasGeneratedFiles = generatedOwlFile != null && !generatedOwlFile.trim().isEmpty()
+                    && generatedObdaFile != null && !generatedObdaFile.trim().isEmpty();
+
+            if (hasUploadFiles) {
+                owlFile.transferTo(owlDest);
+                obdaFile.transferTo(obdaDest);
+                logger.debug("Using uploaded OWL/OBDA files");
+            } else if (hasGeneratedFiles) {
+                File generatedOwl = new File(System.getProperty("user.dir") + "/temp/" + generatedOwlFile);
+                File generatedObda = new File(System.getProperty("user.dir") + "/temp/" + generatedObdaFile);
+                if (!generatedOwl.exists() || !generatedObda.exists()) {
+                    response.put("success", false);
+                    response.put("error", "Generated OWL/OBDA files not found in temp directory");
+                    return ResponseEntity.badRequest().body(response);
+                }
+                java.nio.file.Files.copy(generatedOwl.toPath(), owlDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                java.nio.file.Files.copy(generatedObda.toPath(), obdaDest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                logger.debug("Using generated OWL/OBDA files from temp directory");
+            } else {
+                response.put("success", false);
+                response.put("error", "Please upload OWL/OBDA files, or generate them first");
+                return ResponseEntity.badRequest().body(response);
+            }
             
             File propertiesDest = new File(uploadDir + "config.properties");
             try (java.io.FileWriter writer = new java.io.FileWriter(propertiesDest)) {
-                writer.write("jdbc.url=" + dbUrl + "\n");
+                writer.write("jdbc.url=" + normalizeJdbcUrl(dbUrl) + "\n");
                 writer.write("jdbc.user=" + dbUser + "\n");
                 writer.write("jdbc.password=" + dbPassword + "\n");
                 writer.write("jdbc.driver=" + dbDriver + "\n");
@@ -353,7 +421,7 @@ public class GraphDbController {
                 writer.write(ttlConfig);
             }
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.MULTIPART_FORM_DATA);
             
@@ -411,7 +479,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
 
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
             org.springframework.util.MultiValueMap<String, String> body = new org.springframework.util.LinkedMultiValueMap<>();
@@ -444,7 +512,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
             
@@ -483,7 +551,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
             headers.set("Accept", format.equals("jsonld") ? "application/ld+json" : 
@@ -527,7 +595,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String sparqlUrl = graphDbUrl + "/repositories/" + repoId;
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED);
             headers.set("Accept", "application/sparql-results+json");
@@ -562,7 +630,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String url = graphDbUrl + "/rest/sparql/saved-queries" + (name != null ? "?name=" + name : "");
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.ResponseEntity<Object> response = restTemplate.getForEntity(url, Object.class);
             
             // GraphDB returns { "value": [...], "Count": N } - extract "value"
@@ -590,7 +658,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String url = graphDbUrl + "/rest/sparql/saved-queries";
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
             
@@ -641,7 +709,7 @@ public class GraphDbController {
             graphDbRequest.put("name", request.get("name"));
             graphDbRequest.put("body", request.get("body"));
 
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
 
@@ -671,7 +739,7 @@ public class GraphDbController {
             String graphDbUrl = props.getGraphDb().getUrl();
             String url = graphDbUrl + "/rest/sparql/saved-queries?name=" + name;
             
-            org.springframework.web.client.RestTemplate restTemplate = new org.springframework.web.client.RestTemplate();
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
             restTemplate.delete(url);
             
             response.put("success", true);

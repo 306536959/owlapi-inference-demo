@@ -22,6 +22,7 @@ import java.util.Map;
 public class GraphDbImportService {
 
     private static final Logger logger = LoggerFactory.getLogger(GraphDbImportService.class);
+    private static final String DEFAULT_BASE_IRI = "http://example.com/ontology#";
     private final SystemBuiltinProperties props;
     private Repository repository;
     private final ValueFactory valueFactory = SimpleValueFactory.getInstance();
@@ -35,7 +36,9 @@ public class GraphDbImportService {
         try {
             String graphDbUrl = props.getGraphDb().getUrl();
             String repositoryId = props.getGraphDb().getRepositoryId();
-            repository = new HTTPRepository(graphDbUrl, repositoryId);
+            HTTPRepository httpRepository = new HTTPRepository(graphDbUrl, repositoryId);
+            applyAuth(httpRepository);
+            repository = httpRepository;
             repository.init();
             logger.info("GraphDB repository initialized: {}/repositories/{}", graphDbUrl, repositoryId);
         } catch (Exception e) {
@@ -43,26 +46,11 @@ public class GraphDbImportService {
         }
     }
 
-    public void importOwlFile() throws IOException {
-        if (repository == null) {
-            logger.error("GraphDB repository not initialized");
-            return;
-        }
-
-        try (RepositoryConnection conn = repository.getConnection()) {
-            String owlFilePath = props.getBootstrap().getOutput();
-            File owlFile = new File(owlFilePath);
-
-            if (!owlFile.exists()) {
-                logger.error("OWL file not found: {}", owlFilePath);
-                return;
-            }
-
-            logger.info("Importing OWL file into GraphDB: {}", owlFilePath);
-            conn.add(new FileInputStream(owlFile), props.getBootstrap().getBaseIri(), RDFFormat.RDFXML);
-            logger.info("OWL file imported successfully");
-        } catch (Exception e) {
-            logger.error("Error importing OWL file into GraphDB", e);
+    private void applyAuth(HTTPRepository repository) {
+        String username = props.getGraphDb().getUsername();
+        String password = props.getGraphDb().getPassword();
+        if (username != null && !username.trim().isEmpty()) {
+            repository.setUsernameAndPassword(username, password == null ? "" : password);
         }
     }
 
@@ -70,15 +58,13 @@ public class GraphDbImportService {
      * Import OWL file to a specific repository
      */
     public void importOwlFileToRepository(String repositoryId, InputStream inputStream, RDFFormat format) throws IOException {
-        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        HTTPRepository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        applyAuth(targetRepository);
         targetRepository.init();
 
         try (RepositoryConnection conn = targetRepository.getConnection()) {
             logger.info("Importing OWL/RDF to repository: {}", repositoryId);
-            String baseUri = props.getBootstrap().getBaseIri();
-            if (baseUri == null || baseUri.isEmpty()) {
-                baseUri = "http://example.com/ontology#";
-            }
+            String baseUri = DEFAULT_BASE_IRI;
             conn.add(inputStream, baseUri, format, (org.eclipse.rdf4j.model.Resource[]) null);
             logger.info("Successfully imported to repository: {}", repositoryId);
         } catch (Exception e) {
@@ -93,15 +79,13 @@ public class GraphDbImportService {
      * Import RDF data to a specific repository
      */
     public void importRdfToRepository(String repositoryId, InputStream inputStream, RDFFormat format) throws IOException {
-        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        HTTPRepository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        applyAuth(targetRepository);
         targetRepository.init();
 
         try (RepositoryConnection conn = targetRepository.getConnection()) {
             logger.info("Importing RDF data to repository: {} (format: {})", repositoryId, format);
-            String baseUri = props.getBootstrap().getBaseIri();
-            if (baseUri == null || baseUri.isEmpty()) {
-                baseUri = "http://example.com/ontology#";
-            }
+            String baseUri = DEFAULT_BASE_IRI;
             conn.add(inputStream, baseUri, format, (org.eclipse.rdf4j.model.Resource[]) null);
             logger.info("Successfully imported RDF data to repository: {}", repositoryId);
         } catch (Exception e) {
@@ -123,7 +107,7 @@ public class GraphDbImportService {
 
         try (RepositoryConnection conn = repository.getConnection()) {
             logger.info("Importing RDF file: {}", rdfFile.getAbsolutePath());
-            conn.add(new FileInputStream(rdfFile), props.getBootstrap().getBaseIri(), format);
+            conn.add(new FileInputStream(rdfFile), DEFAULT_BASE_IRI, format);
             logger.info("RDF file imported successfully");
         } catch (Exception e) {
             logger.error("Error importing RDF file", e);
@@ -132,7 +116,8 @@ public class GraphDbImportService {
     }
 
     public void importMappingFile(String repositoryId, byte[] fileContent) throws IOException {
-        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        HTTPRepository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        applyAuth(targetRepository);
         targetRepository.init();
 
         try (RepositoryConnection conn = targetRepository.getConnection()) {
@@ -152,7 +137,8 @@ public class GraphDbImportService {
      * Clear all data from a repository
      */
     public void clearRepository(String repositoryId) {
-        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        HTTPRepository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        applyAuth(targetRepository);
         targetRepository.init();
 
         try (RepositoryConnection conn = targetRepository.getConnection()) {
@@ -172,7 +158,8 @@ public class GraphDbImportService {
      */
     public Map<String, Object> getRepositoryStats(String repositoryId) {
         Map<String, Object> stats = new HashMap<>();
-        Repository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        HTTPRepository targetRepository = new HTTPRepository(props.getGraphDb().getUrl(), repositoryId);
+        applyAuth(targetRepository);
         targetRepository.init();
 
         try (RepositoryConnection conn = targetRepository.getConnection()) {

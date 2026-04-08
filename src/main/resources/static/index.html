@@ -497,17 +497,9 @@
             <i class="fas fa-search"></i>
             <span>SPARQL查询</span>
         </div>
-        <div class="nav-item" data-section="files">
-            <i class="fas fa-file-alt"></i>
-            <span>文件管理</span>
-        </div>
         <div class="nav-item" data-section="saved-queries" onclick="window.open('saved-queries.html', '_blank')">
             <i class="fas fa-bookmark"></i>
             <span>保存的查询</span>
-        </div>
-        <div class="nav-item" onclick="window.open('ontology-editor.html', '_blank')">
-            <i class="fas fa-pencil-ruler"></i>
-            <span>本体编辑器</span>
         </div>
     </nav>
 
@@ -521,6 +513,9 @@
                     <span class="status-dot"></span>
                     <span>GraphDB 连接中...</span>
                 </div>
+                <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
                 <button class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
                     <i class="fas fa-sync-alt"></i>
                 </button>
@@ -543,13 +538,6 @@
                     </div>
                     <div class="value" id="stat-triples">-</div>
                     <div class="label">三元组总数</div>
-                </div>
-                <div class="stat-card">
-                    <div class="icon" style="background: rgba(59, 130, 246, 0.1); color: var(--info);">
-                        <i class="fas fa-file-code"></i>
-                    </div>
-                    <div class="value" id="stat-files">-</div>
-                    <div class="label">生成文件</div>
                 </div>
                 <div class="stat-card">
                     <div class="icon" style="background: rgba(245, 158, 11, 0.1); color: var(--warning);">
@@ -786,81 +774,7 @@ LIMIT 100</textarea>
             </div>
         </section>
 
-        <!-- File Management Section -->
-        <section id="section-files" class="section">
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <span><i class="fas fa-file-alt me-2"></i>生成的文件</span>
-                            <button class="btn btn-sm btn-outline-primary" onclick="loadGeneratedFiles()">
-                                <i class="fas fa-sync-alt me-1"></i>刷新
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div id="generatedFilesList">
-                                <div class="text-center text-muted py-4">
-                                    <i class="fas fa-spinner fa-spin"></i> 加载中...
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-lg-6">
-                    <div class="card">
-                        <div class="card-header">
-                            <span><i class="fas fa-eye me-2"></i>文件预览</span>
-                        </div>
-                        <div class="card-body">
-                            <div id="filePreview" class="code-editor" style="min-height: 300px;">
-                                <pre class="text-muted">选择文件查看内容...</pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
     </main>
-
-    <!-- Upload Ontology Files Modal (Update existing repo) -->
-    <div class="modal fade" id="uploadOntologyModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-upload me-2"></i>上传新本体文件 - <span id="uploadOntologyRepoId"></span></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-warning" style="font-size:0.85rem;">
-                        <i class="fas fa-exclamation-triangle me-1"></i>
-                        上传新文件将覆盖仓库现有的 OWL 和 OBDA 文件。覆盖后系统将自动重启仓库使更改生效。
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">OWL 本体文件</label>
-                        <input type="file" class="form-control" id="uploadOwlFile" accept=".owl,.rdf,.ttl">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">OBDA 映射文件</label>
-                        <input type="file" class="form-control" id="uploadObdaFile" accept=".obda">
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="uploadRestartCheck" checked>
-                        <label class="form-check-label" for="uploadRestartCheck">
-                            上传后自动重启仓库
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-success" onclick="uploadOntologyFiles()">
-                        <i class="fas fa-upload me-2"></i>上传并覆盖
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Create Repository Modal -->
     <div class="modal fade" id="createRepoModal" tabindex="-1">
@@ -887,6 +801,11 @@ LIMIT 100</textarea>
                     
                     <div class="form-section">
                         <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
+                        <div class="d-flex justify-content-end mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="testDataSourceConnection()">
+                                <i class="fas fa-plug me-1"></i>测试数据源连接
+                            </button>
+                        </div>
                         <div class="row">
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">JDBC URL</label>
@@ -905,10 +824,17 @@ LIMIT 100</textarea>
                                 <input type="text" class="form-control" id="newRepoDbDriver" value="com.mysql.cj.jdbc.Driver">
                             </div>
                         </div>
+                        <div id="newRepoConnTestResult" style="display:none;"></div>
                     </div>
                     
                     <div class="form-section">
                         <h5><i class="fas fa-file-code text-primary"></i>本体文件</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">可先自动生成，再下载/替换后创建仓库</small>
+                            <button id="btnGenerateOntopFiles" type="button" class="btn btn-sm btn-outline-primary" onclick="generateOntopFilesForCreate()" disabled>
+                                <i class="fas fa-magic me-1"></i>生成OWL/OBDA
+                            </button>
+                        </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">OWL文件</label>
@@ -923,6 +849,7 @@ LIMIT 100</textarea>
                                 <input type="text" class="form-control" id="newRepoBaseIri" value="http://example.com/ontology#">
                             </div>
                         </div>
+                        <div id="newRepoGenerateResult" style="display:none;"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1032,9 +959,6 @@ LIMIT 100</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success" onclick="showUploadOntologyModal()">
-                        <i class="fas fa-upload me-2"></i>上传新本体文件
-                    </button>
                     <button type="button" class="btn btn-outline-primary" onclick="openRepoInQuery()">
                         <i class="fas fa-search me-2"></i>查询此仓库
                     </button>
@@ -1049,18 +973,45 @@ LIMIT 100</textarea>
         // Global State
         let currentRepos = [];
         let startTime = Date.now();
+        let createRepoGeneratedFiles = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            initNavigation();
-            checkGraphDbStatus();
-            loadDashboardData();
-            loadRepositories();
-            loadGeneratedFiles();
-            
-            // Check URL params for shared query links
-            checkUrlParams();
+            ensureAuthenticated().then(ok => {
+                if (!ok) return;
+                bindCreateRepoDbInputListeners();
+                initNavigation();
+                checkGraphDbStatus();
+                loadDashboardData();
+                loadRepositories();
+                
+                // Check URL params for shared query links
+                checkUrlParams();
+            });
         });
+
+        function ensureAuthenticated() {
+            return fetch('/api/auth/status')
+                .then(r => r.json())
+                .then(data => {
+                    if (data && data.authenticated) {
+                        return true;
+                    }
+                    window.location.href = 'login.html';
+                    return false;
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                    return false;
+                });
+        }
+
+        function logout() {
+            fetch('/api/auth/logout', { method: 'POST' })
+                .finally(() => {
+                    window.location.href = 'login.html';
+                });
+        }
         
         // Handle URL parameters for shared query links
         function checkUrlParams() {
@@ -1131,8 +1082,7 @@ LIMIT 100</textarea>
                 'dashboard': '仪表盘',
                 'schema': 'Schema生成',
                 'repositories': '仓库管理',
-                'query': 'SPARQL查询',
-                'files': '文件管理'
+                'query': 'SPARQL查询'
             };
             document.getElementById('pageTitle').textContent = titles[section] || '仪表盘';
         }
@@ -1160,7 +1110,6 @@ LIMIT 100</textarea>
         // Dashboard
         function loadDashboardData() {
             loadRepositories();
-            loadGeneratedFiles();
             
             // Update uptime
             setInterval(() => {
@@ -1224,9 +1173,6 @@ LIMIT 100</textarea>
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="viewRepo('${repo.id}')">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-info me-1" onclick="window.open('ontology-editor.html?repoId=${repo.id}', '_blank')">
-                            <i class="fas fa-pencil-ruler"></i>
-                        </button>
                         <button class="btn btn-sm btn-outline-warning me-1" onclick="restartRepo('${repo.id}')">
                             <i class="fas fa-redo"></i>
                         </button>
@@ -1274,7 +1220,138 @@ LIMIT 100</textarea>
         
         // Repository Actions
         function showCreateRepoModal() {
+            createRepoGeneratedFiles = null;
+            const resultDiv = document.getElementById('newRepoGenerateResult');
+            resultDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+            const connDiv = document.getElementById('newRepoConnTestResult');
+            connDiv.style.display = 'none';
+            connDiv.innerHTML = '';
+            updateGenerateButtonState(false);
             new bootstrap.Modal(document.getElementById('createRepoModal')).show();
+        }
+
+        function updateGenerateButtonState(enabled) {
+            const btn = document.getElementById('btnGenerateOntopFiles');
+            btn.disabled = !enabled;
+            btn.classList.toggle('btn-outline-primary', !enabled);
+            btn.classList.toggle('btn-primary', enabled);
+        }
+
+        function bindCreateRepoDbInputListeners() {
+            ['newRepoDbUrl', 'newRepoDbUser', 'newRepoDbPassword', 'newRepoDbDriver', 'newRepoBaseIri'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('input', () => {
+                    updateGenerateButtonState(false);
+                });
+            });
+        }
+
+        function testDataSourceConnection() {
+            const request = {
+                jdbcUrl: document.getElementById('newRepoDbUrl').value,
+                user: document.getElementById('newRepoDbUser').value,
+                password: document.getElementById('newRepoDbPassword').value,
+                driverClass: document.getElementById('newRepoDbDriver').value
+            };
+            if (!request.jdbcUrl || !request.user) {
+                toast('error', '请先填写数据库连接信息');
+                return;
+            }
+
+            showLoading();
+            fetch('/api/ontology/datasource/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const resultDiv = document.getElementById('newRepoConnTestResult');
+                resultDiv.style.display = 'block';
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="alert alert-success mb-0"><i class="fas fa-check-circle me-2"></i>' +
+                        (data.message || '连接成功') + (data.elapsedMs != null ? ('（耗时 ' + data.elapsedMs + ' ms）') : '') + '</div>';
+                    updateGenerateButtonState(true);
+                    toast('success', '数据源连接成功');
+                } else {
+                    resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>' +
+                        (data.message || '连接失败') + '</div>';
+                    updateGenerateButtonState(false);
+                    toast('error', '数据源连接失败');
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                const resultDiv = document.getElementById('newRepoConnTestResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>连接失败: ' + err.message + '</div>';
+                updateGenerateButtonState(false);
+                toast('error', '数据源连接失败: ' + err.message);
+            });
+        }
+
+        function generateOntopFilesForCreate() {
+            const request = {
+                jdbcUrl: document.getElementById('newRepoDbUrl').value,
+                user: document.getElementById('newRepoDbUser').value,
+                password: document.getElementById('newRepoDbPassword').value,
+                driverClass: document.getElementById('newRepoDbDriver').value,
+                tablePattern: '%',
+                baseIri: document.getElementById('newRepoBaseIri').value
+            };
+
+            if (!request.jdbcUrl || !request.user) {
+                toast('error', '请先填写数据库连接信息');
+                return;
+            }
+
+            showLoading();
+            fetch('/api/ontology/generate/all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const resultDiv = document.getElementById('newRepoGenerateResult');
+                if (!data.success) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>' + (data.message || '生成失败') + '</div>';
+                    return;
+                }
+
+                createRepoGeneratedFiles = {
+                    owlFile: data.owlFile,
+                    obdaFile: data.obdaFile,
+                    propertiesFile: data.propertiesFile
+                };
+
+                let html = '<div class="card border-success mt-2"><div class="card-body">';
+                html += '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>生成成功，可直接创建仓库或下载后手动替换</div>';
+                if (data.owl) {
+                    html += '<p class="mb-2"><strong>OWL统计:</strong> 表: ' + data.owl.tableCount + ' | 数据属性: ' + data.owl.dataPropertyCount + ' | 对象属性: ' + data.owl.objectPropertyCount + '</p>';
+                }
+                html += '<div class="d-flex flex-wrap gap-2">';
+                if (data.owlFile) {
+                    html += '<a href="/api/ontology/files/' + data.owlFile + '/download" class="btn btn-outline-primary btn-sm"><i class="fas fa-file-code me-1"></i>下载 OWL</a>';
+                }
+                if (data.obdaFile) {
+                    html += '<a href="/api/ontology/files/' + data.obdaFile + '/download" class="btn btn-outline-success btn-sm"><i class="fas fa-file-alt me-1"></i>下载 OBDA</a>';
+                }
+                html += '</div></div></div>';
+
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+                toast('success', 'OWL/OBDA 生成成功');
+            })
+            .catch(err => {
+                hideLoading();
+                toast('error', '生成失败: ' + err.message);
+            });
         }
         
         function createOntopRepository() {
@@ -1286,8 +1363,15 @@ LIMIT 100</textarea>
             formData.append('dbPassword', document.getElementById('newRepoDbPassword').value);
             formData.append('dbDriver', document.getElementById('newRepoDbDriver').value);
             formData.append('baseIri', document.getElementById('newRepoBaseIri').value);
-            formData.append('owlFile', document.getElementById('newRepoOwlFile').files[0]);
-            formData.append('obdaFile', document.getElementById('newRepoObdaFile').files[0]);
+            const owlFile = document.getElementById('newRepoOwlFile').files[0];
+            const obdaFile = document.getElementById('newRepoObdaFile').files[0];
+            if (owlFile) formData.append('owlFile', owlFile);
+            if (obdaFile) formData.append('obdaFile', obdaFile);
+
+            if (createRepoGeneratedFiles && createRepoGeneratedFiles.owlFile && createRepoGeneratedFiles.obdaFile) {
+                formData.append('generatedOwlFile', createRepoGeneratedFiles.owlFile);
+                formData.append('generatedObdaFile', createRepoGeneratedFiles.obdaFile);
+            }
             
             showLoading();
             fetch('/api/graphdb/repositories/ontop', { method: 'POST', body: formData })
@@ -1478,49 +1562,6 @@ LIMIT 100</textarea>
             }
         }
 
-        function showUploadOntologyModal() {
-            if (!window.currentRepoDetailId) return;
-            document.getElementById('uploadOntologyRepoId').textContent = window.currentRepoDetailId;
-            document.getElementById('uploadOwlFile').value = '';
-            document.getElementById('uploadObdaFile').value = '';
-            document.getElementById('uploadRestartCheck').checked = true;
-            bootstrap.Modal.getInstance(document.getElementById('repoDetailModal')).hide();
-            new bootstrap.Modal(document.getElementById('uploadOntologyModal')).show();
-        }
-
-        function uploadOntologyFiles() {
-            const repoId = window.currentRepoDetailId;
-            const owlFile = document.getElementById('uploadOwlFile').files[0];
-            const obdaFile = document.getElementById('uploadObdaFile').files[0];
-            const autoRestart = document.getElementById('uploadRestartCheck').checked;
-
-            if (!owlFile && !obdaFile) {
-                toast('error', '请至少选择一个文件上传');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('repoId', repoId);
-            if (owlFile) formData.append('owlFile', owlFile);
-            if (obdaFile) formData.append('obdaFile', obdaFile);
-            formData.append('autoRestart', autoRestart);
-
-            showLoading();
-            fetch('/api/ontology/editor/upload', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(data => {
-                    hideLoading();
-                    if (data.success) {
-                        bootstrap.Modal.getInstance(document.getElementById('uploadOntologyModal')).hide();
-                        toast('success', data.message || '文件上传成功');
-                        loadRepositories();
-                    } else {
-                        toast('error', data.error || '上传失败');
-                    }
-                })
-                .catch(err => { hideLoading(); toast('error', err.message); });
-        }
-
         // Schema Generation
         function generateSchema(type) {
             const request = {
@@ -1571,10 +1612,6 @@ LIMIT 100</textarea>
                     if (data.obdaFile) {
                         html += '<a href="/api/ontology/files/' + data.obdaFile + '/download" class="btn btn-outline-success btn-sm">';
                         html += '<i class="fas fa-file-alt me-1"></i>下载 OBDA (' + data.obdaFile + ')</a>';
-                    }
-                    if (data.propertiesFile) {
-                        html += '<a href="/api/ontology/files/' + data.propertiesFile + '/download" class="btn btn-outline-info btn-sm">';
-                        html += '<i class="fas fa-cog me-1"></i>下载配置 (' + data.propertiesFile + ')</a>';
                     }
                     html += '</div>';
                     
@@ -1712,63 +1749,6 @@ WHERE {
             navigator.clipboard.writeText(results).then(() => toast('success', '已复制到剪贴板'));
         }
         
-        // Files
-        function loadGeneratedFiles() {
-            fetch('/api/ontology/files')
-                .then(r => r.json())
-                .then(data => {
-                    if (!data.success) return;
-                    const files = data.files;
-                    const container = document.getElementById('generatedFilesList');
-                    let html = '';
-                    let fileCount = 0;
-                    
-                    ['owl', 'obda', 'properties'].forEach(type => {
-                        if (files[type]) {
-                            const f = files[type];
-                            const icon = type === 'owl' ? 'fa-file-code' : 'fa-file-alt';
-                            const color = type === 'owl' ? 'primary' : type === 'obda' ? 'success' : 'info';
-                            html += `
-                                <div class="file-item" onclick="viewFile('${f.name}')">
-                                    <div class="icon bg-${color} bg-opacity-10 text-${color}">
-                                        <i class="fas ${icon}"></i>
-                                    </div>
-                                    <div class="info">
-                                        <div class="name">${f.name}</div>
-                                        <div class="meta">${formatSize(f.size)} | ${formatDate(f.lastModified)}</div>
-                                    </div>
-                                    <button class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                            `;
-                            fileCount++;
-                        }
-                    });
-                    
-                    document.getElementById('stat-files').textContent = fileCount;
-                    container.innerHTML = html || '<p class="text-muted text-center">暂无生成的文件</p>';
-                })
-                .catch(() => {
-                    document.getElementById('generatedFilesList').innerHTML = '<p class="text-danger text-center">加载失败</p>';
-                });
-        }
-        
-        function viewFile(fileName) {
-            fetch('/api/ontology/files/' + fileName + '/content')
-                .then(r => r.json())
-                .then(data => {
-                    if (data.success) {
-                        document.getElementById('filePreview').innerHTML = '<pre>' + escapeHtml(data.content) + '</pre>';
-                    } else {
-                        document.getElementById('filePreview').innerHTML = '<pre class="text-danger">' + data.message + '</pre>';
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('filePreview').innerHTML = '<pre class="text-danger">加载失败: ' + err.message + '</pre>';
-                });
-        }
-        
         // Utilities
         function showLoading() {
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -1798,7 +1778,6 @@ WHERE {
         function refreshAll() {
             checkGraphDbStatus();
             loadRepositories();
-            loadGeneratedFiles();
             toast('success', '刷新完成');
         }
         

@@ -11,163 +11,61 @@ rdfs:	http://www.w3.org/2000/01/rdf-schema#
 [MappingDeclaration] @collection [[
 
 mappingId	MAPPING-ID1
-target		:doctor/{doctor_id} a :doctor .
+target		:doctors/{doctor_id} a :doctors .
 mappingId	MAPPING-ID2
-target		:doctor/{doctor_id} :doctor_doctor_name {doctor_name}^^xsd:string .
-source		SELECT `doctor_id`, `doctor_name` FROM `doctor`
+target		:doctors/{doctor_id} :doctors_name {name}^^xsd:string .
+source		SELECT `doctor_id`, `name` FROM `doctors`
 
 mappingId	MAPPING-ID3
-target		:doctor/{doctor_id} :doctor_gender {gender}^^xsd:string .
-source		SELECT `doctor_id`, `gender` FROM `doctor`
+target		:doctors/{doctor_id} :doctors_department {department}^^xsd:string .
+source		SELECT `doctor_id`, `department` FROM `doctors`
 
 mappingId	MAPPING-ID4
-target		:doctor/{doctor_id} :doctor_age {age}^^xsd:integer .
-source		SELECT `doctor_id`, `age` FROM `doctor`
+target		:doctors/{doctor_id} :doctors_title {title}^^xsd:string .
+source		SELECT `doctor_id`, `title` FROM `doctors`
 
 mappingId	MAPPING-ID5
-target		:doctor/{doctor_id} :doctor_title {title}^^xsd:string .
-source		SELECT `doctor_id`, `title` FROM `doctor`
-
+target		:medical_records/{record_id} a :medical_records .
 mappingId	MAPPING-ID6
-target		:doctor/{doctor_id} :doctor_dept_id {dept_id}^^xsd:string .
-source		SELECT `doctor_id`, `dept_id` FROM `doctor`
+target		:medical_records/{record_id} :medical_records_patient_id {patient_id}^^xsd:integer .
+source		SELECT `record_id`, `patient_id` FROM `medical_records`
 
 mappingId	MAPPING-ID7
-target		:doctor/{doctor_id} :doctor_phone {phone}^^xsd:string .
-source		SELECT `doctor_id`, `phone` FROM `doctor`
+target		:medical_records/{record_id} :medical_records_doctor_id {doctor_id}^^xsd:integer .
+source		SELECT `record_id`, `doctor_id` FROM `medical_records`
 
 mappingId	MAPPING-ID8
-target		:doctor/{doctor_id} :doctor_hire_date {hire_date}^^xsd:date .
-source		SELECT `doctor_id`, `hire_date` FROM `doctor`
+target		:medical_records/{record_id} :medical_records_diagnosis {diagnosis}^^xsd:string .
+source		SELECT `record_id`, `diagnosis` FROM `medical_records`
 
 mappingId	MAPPING-ID9
-target		:infection_diagnosis/{diag_id} a :infection_diagnosis .
+target		:medical_records/{record_id} :medical_records_prescription {prescription}^^xsd:string .
+source		SELECT `record_id`, `prescription` FROM `medical_records`
+
 mappingId	MAPPING-ID10
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_patient_id {patient_id}^^xsd:string .
-source		SELECT `diag_id`, `patient_id` FROM `infection_diagnosis`
+target		:medical_records/{record_id} :medical_records_record_date {record_date}^^xsd:date .
+source		SELECT `record_id`, `record_date` FROM `medical_records`
 
 mappingId	MAPPING-ID11
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_doctor_id {doctor_id}^^xsd:string .
-source		SELECT `diag_id`, `doctor_id` FROM `infection_diagnosis`
+target		:medical_records/{record_id} :ref_medical_records_to_doctors_medical_records_ibfk_2 :doctors/{doctor_id} .
+source		SELECT `record_id`, `doctor_id` FROM `medical_records`
 
 mappingId	MAPPING-ID12
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_disease_code {disease_code}^^xsd:string .
-source		SELECT `diag_id`, `disease_code` FROM `infection_diagnosis`
+target		:medical_records/{record_id} :ref_medical_records_to_patients_medical_records_ibfk_1 :patients/{patient_id} .
+source		SELECT `record_id`, `patient_id` FROM `medical_records`
 
 mappingId	MAPPING-ID13
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_diagnosis_date {diagnosis_date}^^xsd:date .
-source		SELECT `diag_id`, `diagnosis_date` FROM `infection_diagnosis`
-
+target		:patients/{patient_id} a :patients .
 mappingId	MAPPING-ID14
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_diagnosis_type {diagnosis_type}^^xsd:string .
-source		SELECT `diag_id`, `diagnosis_type` FROM `infection_diagnosis`
+target		:patients/{patient_id} :patients_name {name}^^xsd:string .
+source		SELECT `patient_id`, `name` FROM `patients`
 
 mappingId	MAPPING-ID15
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_symptoms {symptoms}^^xsd:string .
-source		SELECT `diag_id`, `symptoms` FROM `infection_diagnosis`
+target		:patients/{patient_id} :patients_birth_date {birth_date}^^xsd:date .
+source		SELECT `patient_id`, `birth_date` FROM `patients`
 
 mappingId	MAPPING-ID16
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_body_temperature {body_temperature}^^xsd:decimal .
-source		SELECT `diag_id`, `body_temperature` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID17
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_has_fever {has_fever}^^xsd:integer .
-source		SELECT `diag_id`, `has_fever` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID18
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_is_reported {is_reported}^^xsd:integer .
-source		SELECT `diag_id`, `is_reported` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID19
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_report_date {report_date}^^xsd:date .
-source		SELECT `diag_id`, `report_date` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID20
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_treatment_plan {treatment_plan}^^xsd:string .
-source		SELECT `diag_id`, `treatment_plan` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID21
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_current_status {current_status}^^xsd:string .
-source		SELECT `diag_id`, `current_status` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID22
-target		:infection_diagnosis/{diag_id} :infection_diagnosis_remarks {remarks}^^xsd:string .
-source		SELECT `diag_id`, `remarks` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID23
-target		:infection_diagnosis/{diag_id} :ref_infection_diagnosis_to_doctor_fk_diag_doctor :doctor/{doctor_id} .
-source		SELECT `diag_id`, `doctor_id` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID24
-target		:infection_diagnosis/{diag_id} :ref_infection_diagnosis_to_infectious_disease_fk_diag_disease :infectious_disease/{disease_code} .
-source		SELECT `diag_id`, `disease_code` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID25
-target		:infection_diagnosis/{diag_id} :ref_infection_diagnosis_to_patient_fk_diag_patient :patient/{patient_id} .
-source		SELECT `diag_id`, `patient_id` FROM `infection_diagnosis`
-
-mappingId	MAPPING-ID26
-target		:infectious_disease/{disease_code} a :infectious_disease .
-mappingId	MAPPING-ID27
-target		:infectious_disease/{disease_code} :infectious_disease_disease_name {disease_name}^^xsd:string .
-source		SELECT `disease_code`, `disease_name` FROM `infectious_disease`
-
-mappingId	MAPPING-ID28
-target		:infectious_disease/{disease_code} :infectious_disease_disease_type {disease_type}^^xsd:string .
-source		SELECT `disease_code`, `disease_type` FROM `infectious_disease`
-
-mappingId	MAPPING-ID29
-target		:infectious_disease/{disease_code} :infectious_disease_transmission_route {transmission_route}^^xsd:string .
-source		SELECT `disease_code`, `transmission_route` FROM `infectious_disease`
-
-mappingId	MAPPING-ID30
-target		:infectious_disease/{disease_code} :infectious_disease_incubation_period {incubation_period}^^xsd:string .
-source		SELECT `disease_code`, `incubation_period` FROM `infectious_disease`
-
-mappingId	MAPPING-ID31
-target		:infectious_disease/{disease_code} :infectious_disease_severity_level {severity_level}^^xsd:string .
-source		SELECT `disease_code`, `severity_level` FROM `infectious_disease`
-
-mappingId	MAPPING-ID32
-target		:infectious_disease/{disease_code} :infectious_disease_report_deadline {report_deadline}^^xsd:integer .
-source		SELECT `disease_code`, `report_deadline` FROM `infectious_disease`
-
-mappingId	MAPPING-ID33
-target		:patient/{patient_id} a :patient .
-mappingId	MAPPING-ID34
-target		:patient/{patient_id} :patient_patient_name {patient_name}^^xsd:string .
-source		SELECT `patient_id`, `patient_name` FROM `patient`
-
-mappingId	MAPPING-ID35
-target		:patient/{patient_id} :patient_gender {gender}^^xsd:string .
-source		SELECT `patient_id`, `gender` FROM `patient`
-
-mappingId	MAPPING-ID36
-target		:patient/{patient_id} :patient_age {age}^^xsd:integer .
-source		SELECT `patient_id`, `age` FROM `patient`
-
-mappingId	MAPPING-ID37
-target		:patient/{patient_id} :patient_id_card {id_card}^^xsd:string .
-source		SELECT `patient_id`, `id_card` FROM `patient`
-
-mappingId	MAPPING-ID38
-target		:patient/{patient_id} :patient_phone {phone}^^xsd:string .
-source		SELECT `patient_id`, `phone` FROM `patient`
-
-mappingId	MAPPING-ID39
-target		:patient/{patient_id} :patient_address {address}^^xsd:string .
-source		SELECT `patient_id`, `address` FROM `patient`
-
-mappingId	MAPPING-ID40
-target		:patient/{patient_id} :patient_blood_type {blood_type}^^xsd:string .
-source		SELECT `patient_id`, `blood_type` FROM `patient`
-
-mappingId	MAPPING-ID41
-target		:patient/{patient_id} :patient_allergy_history {allergy_history}^^xsd:string .
-source		SELECT `patient_id`, `allergy_history` FROM `patient`
-
-mappingId	MAPPING-ID42
-target		:patient/{patient_id} :patient_registration_date {registration_date}^^xsd:date .
-source		SELECT `patient_id`, `registration_date` FROM `patient`
+target		:patients/{patient_id} :patients_gender {gender}^^xsd:string .
+source		SELECT `patient_id`, `gender` FROM `patients`
 
 ]]
