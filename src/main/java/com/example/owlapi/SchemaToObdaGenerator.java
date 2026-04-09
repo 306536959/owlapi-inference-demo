@@ -229,8 +229,11 @@ public class SchemaToObdaGenerator {
                 
                 // Subject: :ClassName/{pk}
                 String fkSubjectTemplate = ":" + tableName + "/{" + pkCol + "}";
-                // Object: :TargetClass/{pkValue}
-                String fkObjectTemplate = ":" + targetTableName + "/{" + fk.pkColumn + "}";
+                // Object: :TargetClass/{fkValue}
+                // IMPORTANT: the FK column value in the referencing table equals the referenced PK value.
+                // So we must use fk.fkColumn as the placeholder (it exists in the source SELECT),
+                // not fk.pkColumn (which is a column name in the referenced table).
+                String fkObjectTemplate = ":" + targetTableName + "/{" + fk.fkColumn + "}";
 
                 sb.append("mappingId\t").append("MAPPING-ID").append(mappingId++).append("\n");
                 sb.append("target\t\t").append(fkSubjectTemplate)

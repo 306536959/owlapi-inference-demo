@@ -21,8 +21,7 @@ import java.util.Map;
 @Service
 public class GraphDbImportService {
 
-    private static final Logger logger = LoggerFactory.getLogger(GraphDbImportService.class);
-    private static final String DEFAULT_BASE_IRI = "http://example.com/ontology#";
+    private static final Logger logger = LoggerFactory.getLogger(GraphDbImportService.class);    private static final String DEFAULT_BASE_IRI = "http://example.com/ontology#";
     private final SystemBuiltinProperties props;
     private Repository repository;
     private final ValueFactory valueFactory = SimpleValueFactory.getInstance();

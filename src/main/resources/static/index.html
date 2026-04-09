@@ -485,13 +485,17 @@
             <i class="fas fa-home"></i>
             <span>仪表盘</span>
         </div>
-        <div class="nav-item" data-section="schema">
-            <i class="fas fa-magic"></i>
-            <span>Schema生成</span>
-        </div>
         <div class="nav-item" data-section="repositories">
             <i class="fas fa-folder"></i>
             <span>仓库管理</span>
+        </div>
+        <div class="nav-item" data-section="create-repo">
+            <i class="fas fa-plus-circle"></i>
+            <span>创建仓库</span>
+        </div>
+        <div class="nav-item" data-section="create-fedx">
+            <i class="fas fa-share-nodes"></i>
+            <span>创建FedX仓库</span>
         </div>
         <div class="nav-item" data-section="query">
             <i class="fas fa-search"></i>
@@ -573,9 +577,6 @@
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
-                                <button class="btn btn-outline-primary" onclick="switchSection('schema')">
-                                    <i class="fas fa-magic me-2"></i>生成Schema
-                                </button>
                                 <button class="btn btn-outline-success" onclick="switchSection('query')">
                                     <i class="fas fa-search me-2"></i>SPARQL查询
                                 </button>
@@ -583,65 +584,6 @@
                                     <i class="fas fa-sync-alt me-2"></i>刷新数据
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Schema Generation Section -->
-        <section id="section-schema" class="section">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <span><i class="fas fa-magic me-2"></i>数据库Schema生成OWL/OBDA</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="form-section">
-                                <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <label class="form-label">JDBC URL</label>
-                                        <input type="text" class="form-control" id="schemaJdbcUrl" 
-                                               placeholder="jdbc:mysql://localhost:3306/your_database">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">用户名</label>
-                                        <input type="text" class="form-control" id="schemaUser" placeholder="root">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">密码</label>
-                                        <input type="password" class="form-control" id="schemaPassword" placeholder="******">
-                                    </div>
-                                    <div class="col-md-4 mb-3">
-                                        <label class="form-label">驱动类</label>
-                                        <input type="text" class="form-control" id="schemaDriver" value="com.mysql.cj.jdbc.Driver">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Base IRI</label>
-                                        <input type="text" class="form-control" id="schemaBaseIri" value="http://example.com/ontology#">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">表名过滤 (SQL LIKE)</label>
-                                        <input type="text" class="form-control" id="schemaTablePattern" value="%">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mt-4">
-                                <button class="btn btn-primary" onclick="generateSchema('owl')" id="btn-gen-owl">
-                                    <i class="fas fa-file-code me-2"></i>生成OWL本体
-                                </button>
-                                <button class="btn btn-success" onclick="generateSchema('obda')" id="btn-gen-obda">
-                                    <i class="fas fa-file-alt me-2"></i>生成OBDA映射
-                                </button>
-                                <button class="btn btn-info" onclick="generateSchema('all')" id="btn-gen-all">
-                                    <i class="fas fa-layer-group me-2"></i>生成全部
-                                </button>
-                            </div>
-                            
-                            <div id="schemaResult" class="mt-4" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -687,11 +629,401 @@
             </div>
         </section>
 
+        <!-- Create Repository Section (replica entrypoint) -->
+        <section id="section-create-repo" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <span><i class="fas fa-plus-circle me-2"></i>创建Ontop虚拟仓库</span>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="switchSection('repositories')">
+                            <i class="fas fa-list me-1"></i>返回仓库管理
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="createOntopRepositoryFromPage()">
+                            <i class="fas fa-check me-1"></i>创建
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-section">
+                        <h5><i class="fas fa-info-circle text-primary"></i>基本信息</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">仓库ID</label>
+                                <input type="text" class="form-control" id="createRepoId" placeholder="my_repository">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">仓库标题</label>
+                                <input type="text" class="form-control" id="createRepoTitle" placeholder="My Repository">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
+                        <div class="d-flex justify-content-end mb-2">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="testDataSourceConnectionFromPage()">
+                                <i class="fas fa-plug me-1"></i>测试数据源连接
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">JDBC URL</label>
+                                <input type="text" class="form-control" id="createRepoDbUrl" placeholder="jdbc:mysql://localhost:3306/database">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">用户名</label>
+                                <input type="text" class="form-control" id="createRepoDbUser" placeholder="root">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">密码</label>
+                                <input type="password" class="form-control" id="createRepoDbPassword" placeholder="******">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">驱动类</label>
+                                <input type="text" class="form-control" id="createRepoDbDriver" value="com.mysql.cj.jdbc.Driver">
+                            </div>
+                        </div>
+                        <div id="createRepoConnTestResult" style="display:none;"></div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h5><i class="fas fa-file-code text-primary"></i>本体文件</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <small class="text-muted">可先自动生成，再下载/替换后创建仓库</small>
+                            <button id="btnGenerateOntopFilesPage" type="button" class="btn btn-sm btn-outline-primary" onclick="generateOntopFilesForCreateFromPage()" disabled>
+                                <i class="fas fa-magic me-1"></i>生成OWL/OBDA
+                            </button>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">OWL文件</label>
+                                <input type="file" class="form-control" id="createRepoOwlFile" accept=".owl,.rdf,.ttl">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">OBDA文件</label>
+                                <input type="file" class="form-control" id="createRepoObdaFile" accept=".obda">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Base IRI</label>
+                                <input type="text" class="form-control" id="createRepoBaseIri" value="http://example.com/ontology#">
+                            </div>
+                        </div>
+                        <div id="createRepoGenerateResult" style="display:none;"></div>
+                    </div>
+
+                    <div class="form-section">
+                        <h5><i class="fas fa-wand-magic-sparkles text-primary"></i>增强配置（继承/条件类型）</h5>
+                        <div class="alert alert-warning">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            生成后的 OWL/OBDA 默认只有“表=类、列=属性、外键=关系”。这里可以在创建前直接把继承（<code>rdfs:subClassOf</code>）与条件类型映射写进文件。
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-sitemap me-2"></i>继承（子类）</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6 mb-3">
+                                                <label class="form-label">子类（Class）</label>
+                                                <select id="enhSubClassIri" class="form-select"></select>
+                                                <small class="text-muted">从 OWL 编辑器自动解析</small>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <label class="form-label">父类（Class）</label>
+                                                <select id="enhSuperClassIri" class="form-select"></select>
+                                                <small class="text-muted">从 OWL 编辑器自动解析</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applySubclassAxiomToOwlFromPage()">
+                                                <i class="fas fa-plus me-1"></i>写入 OWL
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="refreshOntologyEntityPickersFromEditors()">
+                                                <i class="fas fa-rotate me-1"></i>刷新下拉
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
+                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            将写入：<code>owl:Class</code> 的 <code>rdfs:subClassOf</code> 公理（RDF/XML）。
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 mb-3">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-filter me-2"></i>条件类型映射（OBDA）</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6 mb-3">
+                                                <label class="form-label">类型（LocalName）</label>
+                                                <input id="enhTypeLocalName" class="form-control" value="doctor" placeholder="doctor">
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <label class="form-label">个体模板</label>
+                                                <input id="enhSubjectTemplate" class="form-control" value=":employee/{emp_id}" placeholder=":table/{id}">
+                                            </div>
+                                            <div class="col-12 mb-3">
+                                                <label class="form-label">SQL 条件（可改）</label>
+                                                <input id="enhSqlCondition" class="form-control" value="FROM `employee` WHERE `is_doctor` = 1" placeholder="FROM `employee` WHERE ...">
+                                                <small class="text-muted">最终会生成：<code>SELECT `emp_id` ...</code>（<code>emp_id</code> 取自模板里的字段）</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyConditionalTypeMappingToObdaFromPage()">
+                                                <i class="fas fa-plus me-1"></i>写入 OBDA
+                                            </button>
+                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoObdaEditor')">
+                                                <i class="fas fa-pen me-1"></i>查看 OBDA 编辑器
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">
+                                            写入位置：OBDA 的 <code>]]</code> 之前（MappingDeclaration 末尾）。
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-diagram-project me-2"></i>官方常用关系（OWL/RDFS）</span>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="refreshOntologyEntityPickersFromEditors()">
+                                                <i class="fas fa-rotate me-1"></i>从 OWL 刷新 Class/Property
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <span><i class="fas fa-right-left me-2"></i>互逆（inverseOf）</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">属性 A（ObjectProperty）</label>
+                                                                <select id="enhInversePropA" class="form-select"></select>
+                                                            </div>
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">属性 B（ObjectProperty）</label>
+                                                                <select id="enhInversePropB" class="form-select"></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyInverseOfToOwlFromPage()">
+                                                                <i class="fas fa-plus me-1"></i>写入 OWL
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
+                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
+                                                            </button>
+                                                        </div>
+                                                        <small class="text-muted d-block mt-2">
+                                                            写入：<code>&lt;owl:ObjectProperty ...&gt;&lt;owl:inverseOf .../&gt;&lt;/owl:ObjectProperty&gt;</code>
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <span><i class="fas fa-bullseye me-2"></i>定义域/值域（domain/range）</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-12 mb-3">
+                                                                <label class="form-label">属性（ObjectProperty）</label>
+                                                                <select id="enhDomainRangeProp" class="form-select"></select>
+                                                            </div>
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">定义域（domain Class）</label>
+                                                                <select id="enhDomainClass" class="form-select"></select>
+                                                            </div>
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">值域（range Class）</label>
+                                                                <select id="enhRangeClass" class="form-select"></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyDomainRangeToOwlFromPage()">
+                                                                <i class="fas fa-plus me-1"></i>写入 OWL
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
+                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
+                                                            </button>
+                                                        </div>
+                                                        <small class="text-muted d-block mt-2">
+                                                            写入：<code>rdfs:domain</code> / <code>rdfs:range</code>（RDF/XML）。
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <span><i class="fas fa-code-branch me-2"></i>子属性（subPropertyOf）</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">子属性</label>
+                                                                <select id="enhSubProp" class="form-select"></select>
+                                                            </div>
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">父属性</label>
+                                                                <select id="enhSuperProp" class="form-select"></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applySubPropertyToOwlFromPage()">
+                                                                <i class="fas fa-plus me-1"></i>写入 OWL
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
+                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 mb-3">
+                                                <div class="card">
+                                                    <div class="card-header">
+                                                        <span><i class="fas fa-layer-group me-2"></i>等价类（equivalentClass，可选）</span>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">类 A</label>
+                                                                <select id="enhEqClassA" class="form-select"></select>
+                                                            </div>
+                                                            <div class="col-6 mb-3">
+                                                                <label class="form-label">类 B</label>
+                                                                <select id="enhEqClassB" class="form-select"></select>
+                                                            </div>
+                                                        </div>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyEquivalentClassToOwlFromPage()">
+                                                                <i class="fas fa-plus me-1"></i>写入 OWL
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
+                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h5><i class="fas fa-code text-primary"></i>生成文件编辑（创建前可直接改）</h5>
+                        <div class="row">
+                            <div class="col-lg-6 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0">OWL（ontology.owl）</label>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="loadGeneratedFileToEditorsFromPage()">
+                                            <i class="fas fa-sync-alt me-1"></i>重新载入生成文件
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="code-editor" id="createRepoOwlEditorWrap">
+                                    <textarea id="createRepoOwlEditor" placeholder="生成后将自动填充，可在此直接编辑 OWL..."></textarea>
+                                </div>
+                                <small class="text-muted">创建仓库时若这里有内容，将优先上传此 OWL（覆盖“生成文件引用”）。</small>
+                            </div>
+                            <div class="col-lg-6 mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label mb-0">OBDA（mapping.obda）</label>
+                                </div>
+                                <div class="code-editor" id="createRepoObdaEditorWrap">
+                                    <textarea id="createRepoObdaEditor" placeholder="生成后将自动填充，可在此直接编辑 OBDA..."></textarea>
+                                </div>
+                                <small class="text-muted">创建仓库时若这里有内容，将优先上传此 OBDA（覆盖“生成文件引用”）。</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Create FedX Repository Section -->
+        <section id="section-create-fedx" class="section">
+            <div class="card">
+                <div class="card-header">
+                    <span><i class="fas fa-share-nodes me-2"></i>创建FedX联邦仓库</span>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="loadRepositories(); refreshFedxMembers()">
+                            <i class="fas fa-sync-alt me-1"></i>刷新仓库列表
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="createFedxRepositoryFromPage()">
+                            <i class="fas fa-check me-1"></i>创建FedX
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-circle-info me-2"></i>
+                        选择多个已存在仓库作为联邦成员，系统会创建一个新的 FedX 仓库（用于跨仓库联邦查询）。
+                    </div>
+
+                    <div class="form-section">
+                        <h5><i class="fas fa-info-circle text-primary"></i>FedX 基本信息</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">仓库ID</label>
+                                <input type="text" class="form-control" id="newFedxRepoId" placeholder="fedx_his">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">仓库标题</label>
+                                <input type="text" class="form-control" id="newFedxRepoTitle" placeholder="联邦查询仓库">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h5><i class="fas fa-link text-primary"></i>联邦成员仓库</h5>
+                        <div class="mb-3">
+                            <label class="form-label">可选成员（多选）</label>
+                            <select class="form-select" id="fedxMemberRepos" multiple size="10"></select>
+                            <small class="text-muted">按 Ctrl/Shift 多选。建议只选可读在线仓库，且不要包含 FedX 仓库本身。</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="selectAllFedxMembers()">
+                                <i class="fas fa-check-double me-1"></i>全选
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary" onclick="clearFedxMembers()">
+                                <i class="fas fa-eraser me-1"></i>清空
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- SPARQL Query Section -->
         <section id="section-query" class="section">
             <div class="row">
-                <div class="col-lg-5">
-                    <div class="card">
+                <div class="col-12">
+                    <div class="card mb-3">
                         <div class="card-header">
                             <span><i class="fas fa-search me-2"></i>SPARQL查询</span>
                         </div>
@@ -756,7 +1088,7 @@ LIMIT 100</textarea>
                     </div>
                 </div>
                 
-                <div class="col-lg-7">
+                <div class="col-12">
                     <div class="card">
                         <div class="card-header">
                             <span><i class="fas fa-table me-2"></i>查询结果</span>
@@ -765,7 +1097,7 @@ LIMIT 100</textarea>
                             </button>
                         </div>
                         <div class="card-body">
-                            <div id="queryResults" class="results-panel" style="min-height: 400px;">
+                            <div id="queryResults" class="results-panel" style="min-height: 520px;">
                                 <pre class="text-muted">查询结果将显示在这里...</pre>
                             </div>
                         </div>
@@ -974,12 +1306,14 @@ LIMIT 100</textarea>
         let currentRepos = [];
         let startTime = Date.now();
         let createRepoGeneratedFiles = null;
+        let createRepoGeneratedFilesPage = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             ensureAuthenticated().then(ok => {
                 if (!ok) return;
                 bindCreateRepoDbInputListeners();
+                bindCreateRepoPageDbInputListeners();
                 initNavigation();
                 checkGraphDbStatus();
                 loadDashboardData();
@@ -1080,11 +1414,16 @@ LIMIT 100</textarea>
             });
             const titles = {
                 'dashboard': '仪表盘',
-                'schema': 'Schema生成',
                 'repositories': '仓库管理',
+                'create-repo': '创建仓库',
+                'create-fedx': '创建FedX仓库',
                 'query': 'SPARQL查询'
             };
             document.getElementById('pageTitle').textContent = titles[section] || '仪表盘';
+
+            if (section === 'create-fedx') {
+                refreshFedxMembers();
+            }
         }
         
         // GraphDB Status
@@ -1217,6 +1556,83 @@ LIMIT 100</textarea>
                 }
             });
         }
+
+        function refreshFedxMembers() {
+            const select = document.getElementById('fedxMemberRepos');
+            if (!select) return;
+            const repos = (currentRepos || []).filter(r => {
+                const type = (r.type || '').toLowerCase();
+                const isFedx = type.includes('fedx');
+                return !isFedx;
+            });
+            select.innerHTML = repos.map(repo => {
+                const label = (repo.title || repo.id) + ' (' + repo.id + ')';
+                return `<option value="${repo.id}">${label}</option>`;
+            }).join('');
+        }
+
+        function getSelectedFedxMembers() {
+            const select = document.getElementById('fedxMemberRepos');
+            if (!select) return [];
+            return Array.from(select.selectedOptions || []).map(o => o.value).filter(Boolean);
+        }
+
+        function selectAllFedxMembers() {
+            const select = document.getElementById('fedxMemberRepos');
+            if (!select) return;
+            Array.from(select.options).forEach(o => o.selected = true);
+        }
+
+        function clearFedxMembers() {
+            const select = document.getElementById('fedxMemberRepos');
+            if (!select) return;
+            Array.from(select.options).forEach(o => o.selected = false);
+        }
+
+        function createFedxRepositoryFromPage() {
+            const id = (document.getElementById('newFedxRepoId').value || '').trim();
+            const title = (document.getElementById('newFedxRepoTitle').value || '').trim();
+            const members = getSelectedFedxMembers();
+
+            if (!id) {
+                toast('error', '请填写 FedX 仓库ID');
+                return;
+            }
+            if (!title) {
+                toast('error', '请填写 FedX 仓库标题');
+                return;
+            }
+            if (!members.length) {
+                toast('error', '请至少选择一个联邦成员仓库');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id', id);
+            formData.append('title', title);
+            formData.append('members', members.join(','));
+
+            showLoading();
+            fetch('/api/graphdb/repositories/fedx', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    toast('success', 'FedX 仓库创建成功');
+                    loadRepositories();
+                    switchSection('repositories');
+                } else {
+                    toast('error', data.error || data.message || '创建失败');
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                toast('error', '创建失败: ' + err.message);
+            });
+        }
         
         // Repository Actions
         function showCreateRepoModal() {
@@ -1238,12 +1654,381 @@ LIMIT 100</textarea>
             btn.classList.toggle('btn-primary', enabled);
         }
 
+        function updateGenerateButtonStatePage(enabled) {
+            const btn = document.getElementById('btnGenerateOntopFilesPage');
+            if (!btn) return;
+            btn.disabled = !enabled;
+            btn.classList.toggle('btn-outline-primary', !enabled);
+            btn.classList.toggle('btn-primary', enabled);
+        }
+
+        function scrollToEditor(editorId) {
+            const el = document.getElementById(editorId);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.focus();
+        }
+
+        function getTextAreaValue(id) {
+            const el = document.getElementById(id);
+            return el ? (el.value || '') : '';
+        }
+
+        function setTextAreaValue(id, value) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.value = value || '';
+        }
+
+        function inferPkFromSubjectTemplate(subjectTemplate) {
+            // Example: :employee/{emp_id} -> emp_id
+            const m = (subjectTemplate || '').match(/\{([^}]+)\}/);
+            return m ? m[1] : null;
+        }
+
+        function uniqStrings(xs) {
+            const set = new Set();
+            (xs || []).forEach(x => {
+                const v = (x || '').trim();
+                if (v) set.add(v);
+            });
+            return Array.from(set.values()).sort();
+        }
+
+        function extractIrisFromOwl(owlXml) {
+            const xml = owlXml || '';
+            const classIris = [];
+            const objPropIris = [];
+            const dataPropIris = [];
+
+            // RDF/XML patterns
+            const classRe = /<owl:Class\b[^>]*\brdf:about="([^"]+)"/g;
+            const opRe = /<owl:ObjectProperty\b[^>]*\brdf:about="([^"]+)"/g;
+            const dpRe = /<owl:DatatypeProperty\b[^>]*\brdf:about="([^"]+)"/g;
+
+            let m;
+            while ((m = classRe.exec(xml)) !== null) classIris.push(m[1]);
+            while ((m = opRe.exec(xml)) !== null) objPropIris.push(m[1]);
+            while ((m = dpRe.exec(xml)) !== null) dataPropIris.push(m[1]);
+
+            return {
+                classes: uniqStrings(classIris),
+                objectProperties: uniqStrings(objPropIris),
+                dataProperties: uniqStrings(dataPropIris)
+            };
+        }
+
+        function fillSelectOptions(selectId, items, placeholder) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            const ph = placeholder || '-- 请选择 --';
+            sel.innerHTML = '<option value="">' + ph + '</option>' +
+                (items || []).map(iri => '<option value="' + iri + '">' + iri + '</option>').join('');
+        }
+
+        function refreshOntologyEntityPickersFromEditors() {
+            const owl = getTextAreaValue('createRepoOwlEditor');
+            if (!owl.trim()) {
+                toast('error', '请先生成并载入 OWL 到编辑器');
+                return;
+            }
+            const { classes, objectProperties, dataProperties } = extractIrisFromOwl(owl);
+            if (!classes.length) {
+                toast('error', '未从 OWL 中解析到 owl:Class（请确认是 RDF/XML 或已载入正确内容）');
+                return;
+            }
+
+            // Class pickers
+            ['enhSubClassIri', 'enhSuperClassIri', 'enhDomainClass', 'enhRangeClass', 'enhEqClassA', 'enhEqClassB'].forEach(id => {
+                fillSelectOptions(id, classes, '-- 选择 Class --');
+            });
+
+            // ObjectProperty pickers
+            ['enhInversePropA', 'enhInversePropB', 'enhDomainRangeProp', 'enhSubProp', 'enhSuperProp'].forEach(id => {
+                fillSelectOptions(id, objectProperties, '-- 选择 ObjectProperty --');
+            });
+
+            // Default helpful guesses
+            const baseIri = (document.getElementById('createRepoBaseIri')?.value || '').trim();
+            if (baseIri) {
+                const trySet = (id, local) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    const iri = baseIri + local;
+                    if (classes.includes(iri) || objectProperties.includes(iri)) el.value = iri;
+                };
+                trySet('enhSubClassIri', 'doctor');
+                trySet('enhSuperClassIri', 'employee');
+            }
+
+            toast('success', `已解析：Class ${classes.length} 个，ObjectProperty ${objectProperties.length} 个，DataProperty ${dataProperties.length} 个`);
+        }
+
+        async function fetchText(url) {
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error('HTTP ' + resp.status + ' for ' + url);
+            return await resp.text();
+        }
+
+        async function loadGeneratedFileToEditorsFromPage() {
+            if (!createRepoGeneratedFilesPage || !createRepoGeneratedFilesPage.owlFile || !createRepoGeneratedFilesPage.obdaFile) {
+                toast('error', '请先生成 OWL/OBDA，或手动上传文件后再载入');
+                return;
+            }
+            try {
+                showLoading();
+                const owlText = await fetchText('/api/ontology/files/' + encodeURIComponent(createRepoGeneratedFilesPage.owlFile) + '/download');
+                const obdaText = await fetchText('/api/ontology/files/' + encodeURIComponent(createRepoGeneratedFilesPage.obdaFile) + '/download');
+                setTextAreaValue('createRepoOwlEditor', owlText);
+                setTextAreaValue('createRepoObdaEditor', obdaText);
+                // Populate pickers
+                refreshOntologyEntityPickersFromEditors();
+                toast('success', '已载入生成的 OWL/OBDA 到编辑器');
+            } catch (e) {
+                toast('error', '载入生成文件失败: ' + e.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function applySubclassAxiomToOwlFromPage() {
+            const subIri = (document.getElementById('enhSubClassIri')?.value || '').trim();
+            const superIri = (document.getElementById('enhSuperClassIri')?.value || '').trim();
+            if (!subIri || !superIri) {
+                toast('error', '请选择 子类 / 父类');
+                return;
+            }
+            const owl = getTextAreaValue('createRepoOwlEditor');
+            if (!owl.trim()) {
+                toast('error', '请先生成并载入 OWL 到编辑器');
+                return;
+            }
+            if (owl.includes(subIri) && owl.includes('subClassOf') && owl.includes(superIri)) {
+                toast('info', 'OWL 中似乎已存在该继承关系（未重复写入）');
+                return;
+            }
+
+            const axiomXml =
+                '\n\n    <owl:Class rdf:about="' + subIri + '">\n' +
+                '        <rdfs:subClassOf rdf:resource="' + superIri + '"/>\n' +
+                '    </owl:Class>\n';
+
+            const idx = owl.lastIndexOf('</rdf:RDF>');
+            if (idx === -1) {
+                toast('error', 'OWL 格式不符合预期（未找到 </rdf:RDF>），请手工编辑');
+                return;
+            }
+            const next = owl.slice(0, idx) + axiomXml + owl.slice(idx);
+            setTextAreaValue('createRepoOwlEditor', next);
+            toast('success', '已写入 OWL 继承（subClassOf）');
+        }
+
+        function upsertObjectPropertyBlock(owl, propIri, innerXmlLines) {
+            const lines = innerXmlLines || [];
+            const inner = lines.map(l => '        ' + l).join('\n');
+            const block =
+                '\n\n    <owl:ObjectProperty rdf:about="' + propIri + '">\n' +
+                inner + '\n' +
+                '    </owl:ObjectProperty>\n';
+
+            // If property block exists, inject missing lines just before its closing tag
+            const re = new RegExp('<owl:ObjectProperty\\b[^>]*rdf:about="' + propIri.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"[\\s\\S]*?<\\/owl:ObjectProperty>', 'm');
+            const m = owl.match(re);
+            if (m && m[0]) {
+                let existing = m[0];
+                let changed = false;
+                lines.forEach(l => {
+                    if (!existing.includes(l)) {
+                        existing = existing.replace('</owl:ObjectProperty>', '        ' + l + '\n    </owl:ObjectProperty>');
+                        changed = true;
+                    }
+                });
+                return changed ? owl.replace(re, existing) : owl;
+            }
+
+            // Otherwise append before </rdf:RDF>
+            const idx = owl.lastIndexOf('</rdf:RDF>');
+            if (idx === -1) return null;
+            return owl.slice(0, idx) + block + owl.slice(idx);
+        }
+
+        function applyInverseOfToOwlFromPage() {
+            const a = (document.getElementById('enhInversePropA')?.value || '').trim();
+            const b = (document.getElementById('enhInversePropB')?.value || '').trim();
+            if (!a || !b) {
+                toast('error', '请选择 属性 A / 属性 B');
+                return;
+            }
+            let owl = getTextAreaValue('createRepoOwlEditor');
+            if (!owl.trim()) {
+                toast('error', '请先生成并载入 OWL 到编辑器');
+                return;
+            }
+            const next = upsertObjectPropertyBlock(owl, a, ['<owl:inverseOf rdf:resource="' + b + '"/>']);
+            if (!next) {
+                toast('error', 'OWL 格式不符合预期（未找到 </rdf:RDF>），请手工编辑');
+                return;
+            }
+            if (next === owl) {
+                toast('info', 'inverseOf 似乎已存在（未重复写入）');
+                return;
+            }
+            setTextAreaValue('createRepoOwlEditor', next);
+            toast('success', '已写入 OWL inverseOf');
+        }
+
+        function applyDomainRangeToOwlFromPage() {
+            const p = (document.getElementById('enhDomainRangeProp')?.value || '').trim();
+            const d = (document.getElementById('enhDomainClass')?.value || '').trim();
+            const r = (document.getElementById('enhRangeClass')?.value || '').trim();
+            if (!p || !d || !r) {
+                toast('error', '请选择 属性 / domain / range');
+                return;
+            }
+            let owl = getTextAreaValue('createRepoOwlEditor');
+            if (!owl.trim()) {
+                toast('error', '请先生成并载入 OWL 到编辑器');
+                return;
+            }
+            const lines = [
+                '<rdfs:domain rdf:resource="' + d + '"/>',
+                '<rdfs:range rdf:resource="' + r + '"/>'
+            ];
+            const next = upsertObjectPropertyBlock(owl, p, lines);
+            if (!next) {
+                toast('error', 'OWL 格式不符合预期（未找到 </rdf:RDF>），请手工编辑');
+                return;
+            }
+            if (next === owl) {
+                toast('info', 'domain/range 似乎已存在（未重复写入）');
+                return;
+            }
+            setTextAreaValue('createRepoOwlEditor', next);
+            toast('success', '已写入 OWL domain/range');
+        }
+
+        function applySubPropertyToOwlFromPage() {
+            const sub = (document.getElementById('enhSubProp')?.value || '').trim();
+            const sup = (document.getElementById('enhSuperProp')?.value || '').trim();
+            if (!sub || !sup) {
+                toast('error', '请选择 子属性 / 父属性');
+                return;
+            }
+            let owl = getTextAreaValue('createRepoOwlEditor');
+            if (!owl.trim()) {
+                toast('error', '请先生成并载入 OWL 到编辑器');
+                return;
+            }
+            const line = '<rdfs:subPropertyOf rdf:resource="' + sup + '"/>';
+            const next = upsertObjectPropertyBlock(owl, sub, [line]);
+            if (!next) {
+                toast('error', 'OWL 格式不符合预期（未找到 </rdf:RDF>），请手工编辑');
+                return;
+            }
+            if (next === owl) {
+                toast('info', 'subPropertyOf 似乎已存在（未重复写入）');
+                return;
+            }
+            setTextAreaValue('createRepoOwlEditor', next);
+            toast('success', '已写入 OWL subPropertyOf');
+        }
+
+        function applyEquivalentClassToOwlFromPage() {
+            const a = (document.getElementById('enhEqClassA')?.value || '').trim();
+            const b = (document.getElementById('enhEqClassB')?.value || '').trim();
+            if (!a || !b) {
+                toast('error', '请选择 类 A / 类 B');
+                return;
+            }
+            const owl = getTextAreaValue('createRepoOwlEditor');
+            if (!owl.trim()) {
+                toast('error', '请先生成并载入 OWL 到编辑器');
+                return;
+            }
+            // Simple RDF/XML insertion: add equivalentClass under Class A (or append new Class block)
+            const re = new RegExp('<owl:Class\\b[^>]*rdf:about="' + a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '"[\\s\\S]*?<\\/owl:Class>', 'm');
+            const m = owl.match(re);
+            let next = null;
+            if (m && m[0]) {
+                if (m[0].includes('owl:equivalentClass') && m[0].includes(b)) {
+                    toast('info', 'equivalentClass 似乎已存在（未重复写入）');
+                    return;
+                }
+                const injected = m[0].replace('</owl:Class>', '        <owl:equivalentClass rdf:resource="' + b + '"/>\n    </owl:Class>');
+                next = owl.replace(re, injected);
+            } else {
+                const idx = owl.lastIndexOf('</rdf:RDF>');
+                if (idx === -1) {
+                    toast('error', 'OWL 格式不符合预期（未找到 </rdf:RDF>），请手工编辑');
+                    return;
+                }
+                next = owl.slice(0, idx) +
+                    '\n\n    <owl:Class rdf:about="' + a + '">\n' +
+                    '        <owl:equivalentClass rdf:resource="' + b + '"/>\n' +
+                    '    </owl:Class>\n' +
+                    owl.slice(idx);
+            }
+            setTextAreaValue('createRepoOwlEditor', next);
+            toast('success', '已写入 OWL equivalentClass');
+        }
+        function applyConditionalTypeMappingToObdaFromPage() {
+            const typeLocal = (document.getElementById('enhTypeLocalName')?.value || '').trim();
+            const subjectTemplate = (document.getElementById('enhSubjectTemplate')?.value || '').trim();
+            const sqlCondition = (document.getElementById('enhSqlCondition')?.value || '').trim();
+            if (!typeLocal || !subjectTemplate || !sqlCondition) {
+                toast('error', '请填写 类型 / 个体模板 / SQL 条件');
+                return;
+            }
+            const obda = getTextAreaValue('createRepoObdaEditor');
+            if (!obda.trim()) {
+                toast('error', '请先生成并载入 OBDA 到编辑器');
+                return;
+            }
+
+            const pk = inferPkFromSubjectTemplate(subjectTemplate);
+            if (!pk) {
+                toast('error', '无法从“个体模板”中解析字段（需要形如 {emp_id}）');
+                return;
+            }
+
+            const mappingId = 'MAPPING-ENH-TYPE-' + Date.now();
+            const block =
+                '\n' +
+                'mappingId\t' + mappingId + '\n' +
+                'target\t\t' + subjectTemplate + ' a :' + typeLocal + ' .\n' +
+                'source\t\tSELECT `' + pk + '` ' + sqlCondition + '\n';
+
+            if (obda.includes('target\t\t' + subjectTemplate + ' a :' + typeLocal)) {
+                toast('info', 'OBDA 中似乎已存在该条件类型映射（未重复写入）');
+                return;
+            }
+
+            const endIdx = obda.lastIndexOf(']]');
+            if (endIdx === -1) {
+                toast('error', 'OBDA 格式不符合预期（未找到 ]]），请手工编辑');
+                return;
+            }
+            const next = obda.slice(0, endIdx) + block + '\n' + obda.slice(endIdx);
+            setTextAreaValue('createRepoObdaEditor', next);
+            toast('success', '已写入 OBDA 条件类型映射');
+        }
+
         function bindCreateRepoDbInputListeners() {
             ['newRepoDbUrl', 'newRepoDbUser', 'newRepoDbPassword', 'newRepoDbDriver', 'newRepoBaseIri'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 el.addEventListener('input', () => {
                     updateGenerateButtonState(false);
+                });
+            });
+        }
+
+        function bindCreateRepoPageDbInputListeners() {
+            ['createRepoDbUrl', 'createRepoDbUser', 'createRepoDbPassword', 'createRepoDbDriver', 'createRepoBaseIri'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('input', () => {
+                    updateGenerateButtonStatePage(false);
                 });
             });
         }
@@ -1289,6 +2074,51 @@ LIMIT 100</textarea>
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>连接失败: ' + err.message + '</div>';
                 updateGenerateButtonState(false);
+                toast('error', '数据源连接失败: ' + err.message);
+            });
+        }
+
+        function testDataSourceConnectionFromPage() {
+            const request = {
+                jdbcUrl: document.getElementById('createRepoDbUrl').value,
+                user: document.getElementById('createRepoDbUser').value,
+                password: document.getElementById('createRepoDbPassword').value,
+                driverClass: document.getElementById('createRepoDbDriver').value
+            };
+            if (!request.jdbcUrl || !request.user) {
+                toast('error', '请先填写数据库连接信息');
+                return;
+            }
+
+            showLoading();
+            fetch('/api/ontology/datasource/test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const resultDiv = document.getElementById('createRepoConnTestResult');
+                resultDiv.style.display = 'block';
+                if (data.success) {
+                    resultDiv.innerHTML = '<div class="alert alert-success mb-0"><i class="fas fa-check-circle me-2"></i>' +
+                        (data.message || '连接成功') + (data.elapsedMs != null ? ('（耗时 ' + data.elapsedMs + ' ms）') : '') + '</div>';
+                    updateGenerateButtonStatePage(true);
+                    toast('success', '数据源连接成功');
+                } else {
+                    resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>' +
+                        (data.message || '连接失败') + '</div>';
+                    updateGenerateButtonStatePage(false);
+                    toast('error', '数据源连接失败');
+                }
+            })
+            .catch(err => {
+                hideLoading();
+                const resultDiv = document.getElementById('createRepoConnTestResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>连接失败: ' + err.message + '</div>';
+                updateGenerateButtonStatePage(false);
                 toast('error', '数据源连接失败: ' + err.message);
             });
         }
@@ -1353,6 +2183,69 @@ LIMIT 100</textarea>
                 toast('error', '生成失败: ' + err.message);
             });
         }
+
+        function generateOntopFilesForCreateFromPage() {
+            const request = {
+                jdbcUrl: document.getElementById('createRepoDbUrl').value,
+                user: document.getElementById('createRepoDbUser').value,
+                password: document.getElementById('createRepoDbPassword').value,
+                driverClass: document.getElementById('createRepoDbDriver').value,
+                tablePattern: '%',
+                baseIri: document.getElementById('createRepoBaseIri').value
+            };
+
+            if (!request.jdbcUrl || !request.user) {
+                toast('error', '请先填写数据库连接信息');
+                return;
+            }
+
+            showLoading();
+            fetch('/api/ontology/generate/all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            })
+            .then(r => r.json())
+            .then(data => {
+                hideLoading();
+                const resultDiv = document.getElementById('createRepoGenerateResult');
+                if (!data.success) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = '<div class="alert alert-danger mb-0"><i class="fas fa-times-circle me-2"></i>' + (data.message || '生成失败') + '</div>';
+                    return;
+                }
+
+                createRepoGeneratedFilesPage = {
+                    owlFile: data.owlFile,
+                    obdaFile: data.obdaFile,
+                    propertiesFile: data.propertiesFile
+                };
+
+                let html = '<div class="card border-success mt-2"><div class="card-body">';
+                html += '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>生成成功，可直接创建仓库或下载后手动替换</div>';
+                if (data.owl) {
+                    html += '<p class="mb-2"><strong>OWL统计:</strong> 表: ' + data.owl.tableCount + ' | 数据属性: ' + data.owl.dataPropertyCount + ' | 对象属性: ' + data.owl.objectPropertyCount + '</p>';
+                }
+                html += '<div class="d-flex flex-wrap gap-2">';
+                if (data.owlFile) {
+                    html += '<a href="/api/ontology/files/' + data.owlFile + '/download" class="btn btn-outline-primary btn-sm"><i class="fas fa-file-code me-1"></i>下载 OWL</a>';
+                }
+                if (data.obdaFile) {
+                    html += '<a href="/api/ontology/files/' + data.obdaFile + '/download" class="btn btn-outline-success btn-sm"><i class="fas fa-file-alt me-1"></i>下载 OBDA</a>';
+                }
+                html += '</div></div></div>';
+
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+                // Auto-load into editors for immediate tweak
+                loadGeneratedFileToEditorsFromPage();
+                toast('success', 'OWL/OBDA 生成成功');
+            })
+            .catch(err => {
+                hideLoading();
+                toast('error', '生成失败: ' + err.message);
+            });
+        }
         
         function createOntopRepository() {
             const formData = new FormData();
@@ -1382,6 +2275,56 @@ LIMIT 100</textarea>
                         toast('success', '仓库创建成功');
                         bootstrap.Modal.getInstance(document.getElementById('createRepoModal')).hide();
                         loadRepositories();
+                    } else {
+                        toast('error', data.error || '创建失败');
+                    }
+                })
+                .catch(err => {
+                    hideLoading();
+                    toast('error', '创建失败: ' + err.message);
+                });
+        }
+
+        function createOntopRepositoryFromPage() {
+            const formData = new FormData();
+            formData.append('id', document.getElementById('createRepoId').value);
+            formData.append('title', document.getElementById('createRepoTitle').value);
+            formData.append('dbUrl', document.getElementById('createRepoDbUrl').value);
+            formData.append('dbUser', document.getElementById('createRepoDbUser').value);
+            formData.append('dbPassword', document.getElementById('createRepoDbPassword').value);
+            formData.append('dbDriver', document.getElementById('createRepoDbDriver').value);
+            formData.append('baseIri', document.getElementById('createRepoBaseIri').value);
+
+            // Prefer editor content > uploaded file > generated file references
+            const owlEditor = getTextAreaValue('createRepoOwlEditor').trim();
+            const obdaEditor = getTextAreaValue('createRepoObdaEditor').trim();
+            if (owlEditor) {
+                formData.append('owlFile', new File([owlEditor], 'ontology.owl', { type: 'application/xml' }));
+            } else {
+                const owlFile = document.getElementById('createRepoOwlFile').files[0];
+                if (owlFile) formData.append('owlFile', owlFile);
+            }
+            if (obdaEditor) {
+                formData.append('obdaFile', new File([obdaEditor], 'mapping.obda', { type: 'text/plain' }));
+            } else {
+                const obdaFile = document.getElementById('createRepoObdaFile').files[0];
+                if (obdaFile) formData.append('obdaFile', obdaFile);
+            }
+
+            if (createRepoGeneratedFilesPage && createRepoGeneratedFilesPage.owlFile && createRepoGeneratedFilesPage.obdaFile) {
+                formData.append('generatedOwlFile', createRepoGeneratedFilesPage.owlFile);
+                formData.append('generatedObdaFile', createRepoGeneratedFilesPage.obdaFile);
+            }
+
+            showLoading();
+            fetch('/api/graphdb/repositories/ontop', { method: 'POST', body: formData })
+                .then(r => r.json())
+                .then(data => {
+                    hideLoading();
+                    if (data.success) {
+                        toast('success', '仓库创建成功');
+                        loadRepositories();
+                        switchSection('repositories');
                     } else {
                         toast('error', data.error || '创建失败');
                     }
@@ -1562,73 +2505,6 @@ LIMIT 100</textarea>
             }
         }
 
-        // Schema Generation
-        function generateSchema(type) {
-            const request = {
-                jdbcUrl: document.getElementById('schemaJdbcUrl').value,
-                user: document.getElementById('schemaUser').value,
-                password: document.getElementById('schemaPassword').value,
-                driverClass: document.getElementById('schemaDriver').value,
-                tablePattern: document.getElementById('schemaTablePattern').value,
-                baseIri: document.getElementById('schemaBaseIri').value
-            };
-            
-            if (!request.jdbcUrl || !request.user) {
-                toast('error', '请填写数据库连接信息');
-                return;
-            }
-            
-            const endpoint = type === 'all' ? '/generate/all' : '/generate/' + type;
-            showLoading();
-            
-            fetch('/api/ontology' + endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(request)
-            })
-            .then(r => r.json())
-            .then(data => {
-                hideLoading();
-                const resultDiv = document.getElementById('schemaResult');
-                if (data.success) {
-                    let html = '<div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>' + data.message + '</div>';
-                    html += '<div class="card"><div class="card-body">';
-                    
-                    // Stats
-                    if (data.owl) {
-                        html += '<p class="mb-2"><strong>OWL本体统计:</strong> 表: ' + data.owl.tableCount + ' | 数据属性: ' + data.owl.dataPropertyCount + ' | 对象属性: ' + data.owl.objectPropertyCount + '</p>';
-                    }
-                    if (data.obdaFile) {
-                        html += '<p class="mb-3"><strong>OBDA映射已生成</strong></p>';
-                    }
-                    
-                    // Download buttons
-                    html += '<h6><i class="fas fa-download me-2"></i>下载文件</h6>';
-                    html += '<div class="d-flex flex-wrap gap-2 mt-2">';
-                    if (data.owlFile) {
-                        html += '<a href="/api/ontology/files/' + data.owlFile + '/download" class="btn btn-outline-primary btn-sm">';
-                        html += '<i class="fas fa-file-code me-1"></i>下载 OWL (' + data.owlFile + ')</a>';
-                    }
-                    if (data.obdaFile) {
-                        html += '<a href="/api/ontology/files/' + data.obdaFile + '/download" class="btn btn-outline-success btn-sm">';
-                        html += '<i class="fas fa-file-alt me-1"></i>下载 OBDA (' + data.obdaFile + ')</a>';
-                    }
-                    html += '</div>';
-                    
-                    html += '</div></div>';
-                    resultDiv.innerHTML = html;
-                    resultDiv.style.display = 'block';
-                } else {
-                    resultDiv.innerHTML = '<div class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>' + data.message + '</div>';
-                    resultDiv.style.display = 'block';
-                }
-            })
-            .catch(err => {
-                hideLoading();
-                toast('error', '生成失败: ' + err.message);
-            });
-        }
-        
         // SPARQL Query
         function executeQuery() {
             const repoId = document.getElementById('queryRepoSelect').value;

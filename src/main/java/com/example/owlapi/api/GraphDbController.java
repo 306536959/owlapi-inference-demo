@@ -464,6 +464,105 @@ public class GraphDbController {
         }
     }
 
+    /**
+     * Create FedX federation repository
+     */
+    @PostMapping("/repositories/fedx")
+    public ResponseEntity<Map<String, Object>> createFedxRepository(
+            @RequestParam("id") String id,
+            @RequestParam("title") String title,
+            @RequestParam("members") String members) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (id == null || id.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("error", "Repository id is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+            if (members == null || members.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("error", "At least one federation member is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            String[] memberIds = java.util.Arrays.stream(members.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toArray(String[]::new);
+            if (memberIds.length == 0) {
+                response.put("success", false);
+                response.put("error", "At least one federation member is required");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            String createRepoUrl = props.getGraphDb().getUrl() + "/rest/repositories";
+            org.springframework.web.client.RestTemplate restTemplate = createRestTemplate();
+
+            java.util.List<Map<String, String>> memberValues = new java.util.ArrayList<>();
+            for (String memberId : memberIds) {
+                Map<String, String> member = new HashMap<>();
+                member.put("repoType", "ontop");
+                member.put("repositoryName", memberId);
+                member.put("respectRights", "true");
+                member.put("store", "ResolvableRepository");
+                member.put("writable", "false");
+                memberValues.add(member);
+            }
+
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("id", id);
+            payload.put("title", title);
+            payload.put("type", "fedx");
+            payload.put("sesameType", "graphdb:FedXRepository");
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("queryTimeout", mapParam("queryTimeout", "Query timeout (seconds)", "0"));
+            params.put("includeInferredDefault", mapParam("includeInferredDefault", "Include inferred default", "true"));
+            params.put("member", mapParam("member", "FedX repo members", memberValues));
+            params.put("enableServiceAsBoundJoin", mapParam("enableServiceAsBoundJoin", "Enable service as bound join", "true"));
+            params.put("boundJoinBlockSize", mapParam("boundJoinBlockSize", "Bound join block size", "15"));
+            params.put("joinWorkerThreads", mapParam("joinWorkerThreads", "Join worker threads", "20"));
+            params.put("unionWorkerThreads", mapParam("unionWorkerThreads", "Union worker threads", "20"));
+            params.put("leftJoinWorkerThreads", mapParam("leftJoinWorkerThreads", "Left join worker threads", "10"));
+            params.put("sourceCacheSpec", mapParam("sourceCacheSpec", "Source selection cache spec", "maximumSize=1000,expireAfterWrite=6h"));
+            params.put("enableMonitoring", mapParam("enableMonitoring", "Enable monitoring", "false"));
+            params.put("isLogQueries", mapParam("isLogQueries", "Log queries", "false"));
+            params.put("isLogQueryPlan", mapParam("isLogQueryPlan", "Log query plan", "false"));
+            params.put("debugQueryPlan", mapParam("debugQueryPlan", "Debug query plan", "false"));
+            payload.put("params", params);
+
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            org.springframework.http.HttpEntity<Map<String, Object>> requestEntity =
+                    new org.springframework.http.HttpEntity<>(payload, headers);
+
+            org.springframework.http.ResponseEntity<String> resp = restTemplate.postForEntity(createRepoUrl, requestEntity, String.class);
+            if (resp.getStatusCode().is2xxSuccessful()) {
+                response.put("success", true);
+                response.put("message", "FedX repository created successfully");
+                response.put("repositoryId", id);
+                response.put("members", memberIds);
+            } else {
+                response.put("success", false);
+                response.put("message", "Failed: " + resp.getStatusCode().getReasonPhrase());
+            }
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error creating FedX repository", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    private Map<String, Object> mapParam(String name, String label, Object value) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("name", name);
+        param.put("label", label);
+        param.put("value", value);
+        return param;
+    }
+
     // ========== SPARQL Query APIs ==========
 
     /**

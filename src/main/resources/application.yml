@@ -4,7 +4,7 @@ server:
 ontology:
   # GraphDB 配置
   graph-db:
-    url: http://192.168.10.97:7200
+    url: http://192.168.10.36:7200
     repository-id: test
     username: admin
     password: root
