@@ -1,0 +1,104 @@
+<div class="modal fade" id="repoDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-folder-open me-2"></i>仓库详情 - <span id="repoDetailTitle">-</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <span class="badge bg-secondary me-2" id="repoDetailId">-</span>
+                    <span class="badge" id="repoDetailStatus">-</span>
+                </div>
+
+                <ul class="nav nav-tabs mb-3" id="repoDetailTabs">
+                    <li class="nav-item">
+                        <a class="nav-link active" data-bs-toggle="tab" href="#repo-tab-files">配置文件</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" data-bs-toggle="tab" href="#repo-tab-info">仓库信息</a>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="repo-tab-files">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-file-code me-2"></i>OWL本体</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="repoOwlFile">
+                                            <p class="text-muted text-center">加载中...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-file-alt me-2"></i>OBDA映射</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="repoObdaFile">
+                                            <p class="text-muted text-center">加载中...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <span><i class="fas fa-cog me-2"></i>数据库配置</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="repoPropertiesFile">
+                                            <p class="text-muted text-center">加载中...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="form-label">文件预览</label>
+                            <div class="code-editor bg-dark text-light p-3 rounded" id="repoFilePreview" style="min-height: 300px; max-height: 400px; overflow: auto;">
+                                <pre class="mb-0 text-light">选择左侧文件查看内容...</pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="repo-tab-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <table class="table table-sm">
+                                    <tr>
+                                        <th width="30%">仓库ID</th>
+                                        <td id="infoRepoId">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>标题</th>
+                                        <td id="infoRepoTitle">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>类型</th>
+                                        <td id="infoRepoType">-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>状态</th>
+                                        <td id="infoRepoReadable">-</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" onclick="openRepoInQuery()">
+                    <i class="fas fa-search me-2"></i>查询此仓库
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,37 @@
+<section id="section-repositories" class="section">
+    <div class="card">
+        <div class="card-header">
+            <span><i class="fas fa-folder me-2"></i>仓库列表</span>
+            <div>
+                <button class="btn btn-sm btn-outline-primary me-2" onclick="loadRepositories()">
+                    <i class="fas fa-sync-alt me-1"></i>刷新
+                </button>
+                <button class="btn btn-sm btn-success" onclick="showCreateRepoModal()">
+                    <i class="fas fa-plus me-1"></i>新建Ontop仓库
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>标题</th>
+                            <th>类型</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="repositoriesTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fas fa-spinner fa-spin me-2"></i>加载中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

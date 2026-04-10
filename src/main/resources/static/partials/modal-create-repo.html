@@ -1,0 +1,84 @@
+<div class="modal fade" id="createRepoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus-circle me-2"></i>创建Ontop虚拟仓库</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-section">
+                    <h5><i class="fas fa-info-circle text-primary"></i>基本信息</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">仓库ID</label>
+                            <input type="text" class="form-control" id="newRepoId" placeholder="my_repository">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">仓库标题</label>
+                            <input type="text" class="form-control" id="newRepoTitle" placeholder="My Repository">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
+                    <div class="d-flex justify-content-end mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-success" onclick="testDataSourceConnection()">
+                            <i class="fas fa-plug me-1"></i>测试数据源连接
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">JDBC URL</label>
+                            <input type="text" class="form-control" id="newRepoDbUrl" placeholder="jdbc:mysql://localhost:3306/database">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-control" id="newRepoDbUser" placeholder="root">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">密码</label>
+                            <input type="password" class="form-control" id="newRepoDbPassword" placeholder="******">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">驱动类</label>
+                            <input type="text" class="form-control" id="newRepoDbDriver" value="com.mysql.cj.jdbc.Driver">
+                        </div>
+                    </div>
+                    <div id="newRepoConnTestResult" style="display:none;"></div>
+                </div>
+
+                <div class="form-section">
+                    <h5><i class="fas fa-file-code text-primary"></i>本体文件</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <small class="text-muted">可先自动生成，再下载/替换后创建仓库</small>
+                        <button id="btnGenerateOntopFiles" type="button" class="btn btn-sm btn-outline-primary" onclick="generateOntopFilesForCreate()" disabled>
+                            <i class="fas fa-magic me-1"></i>生成OWL/OBDA
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">OWL文件</label>
+                            <input type="file" class="form-control" id="newRepoOwlFile" accept=".owl,.rdf,.ttl">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">OBDA文件</label>
+                            <input type="file" class="form-control" id="newRepoObdaFile" accept=".obda">
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">Base IRI</label>
+                            <input type="text" class="form-control" id="newRepoBaseIri" value="http://example.com/ontology#">
+                        </div>
+                    </div>
+                    <div id="newRepoGenerateResult" style="display:none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" onclick="createOntopRepository()">
+                    <i class="fas fa-check me-2"></i>创建
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
