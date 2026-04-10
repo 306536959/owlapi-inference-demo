@@ -489,10 +489,6 @@
             <i class="fas fa-folder"></i>
             <span>仓库管理</span>
         </div>
-        <div class="nav-item" data-section="create-repo">
-            <i class="fas fa-plus-circle"></i>
-            <span>创建仓库</span>
-        </div>
         <div class="nav-item" data-section="create-fedx">
             <i class="fas fa-share-nodes"></i>
             <span>创建FedX仓库</span>
@@ -629,342 +625,6 @@
             </div>
         </section>
 
-        <!-- Create Repository Section (replica entrypoint) -->
-        <section id="section-create-repo" class="section">
-            <div class="card">
-                <div class="card-header">
-                    <span><i class="fas fa-plus-circle me-2"></i>创建Ontop虚拟仓库</span>
-                    <div>
-                        <button class="btn btn-sm btn-outline-primary me-2" onclick="switchSection('repositories')">
-                            <i class="fas fa-list me-1"></i>返回仓库管理
-                        </button>
-                        <button class="btn btn-sm btn-success" onclick="createOntopRepositoryFromPage()">
-                            <i class="fas fa-check me-1"></i>创建
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="form-section">
-                        <h5><i class="fas fa-info-circle text-primary"></i>基本信息</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">仓库ID</label>
-                                <input type="text" class="form-control" id="createRepoId" placeholder="my_repository">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">仓库标题</label>
-                                <input type="text" class="form-control" id="createRepoTitle" placeholder="My Repository">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h5><i class="fas fa-database text-primary"></i>数据库连接</h5>
-                        <div class="d-flex justify-content-end mb-2">
-                            <button type="button" class="btn btn-sm btn-outline-success" onclick="testDataSourceConnectionFromPage()">
-                                <i class="fas fa-plug me-1"></i>测试数据源连接
-                            </button>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">JDBC URL</label>
-                                <input type="text" class="form-control" id="createRepoDbUrl" placeholder="jdbc:mysql://localhost:3306/database">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">用户名</label>
-                                <input type="text" class="form-control" id="createRepoDbUser" placeholder="root">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">密码</label>
-                                <input type="password" class="form-control" id="createRepoDbPassword" placeholder="******">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">驱动类</label>
-                                <input type="text" class="form-control" id="createRepoDbDriver" value="com.mysql.cj.jdbc.Driver">
-                            </div>
-                        </div>
-                        <div id="createRepoConnTestResult" style="display:none;"></div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h5><i class="fas fa-file-code text-primary"></i>本体文件</h5>
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <small class="text-muted">可先自动生成，再下载/替换后创建仓库</small>
-                            <button id="btnGenerateOntopFilesPage" type="button" class="btn btn-sm btn-outline-primary" onclick="generateOntopFilesForCreateFromPage()" disabled>
-                                <i class="fas fa-magic me-1"></i>生成OWL/OBDA
-                            </button>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">OWL文件</label>
-                                <input type="file" class="form-control" id="createRepoOwlFile" accept=".owl,.rdf,.ttl">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">OBDA文件</label>
-                                <input type="file" class="form-control" id="createRepoObdaFile" accept=".obda">
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Base IRI</label>
-                                <input type="text" class="form-control" id="createRepoBaseIri" value="http://example.com/ontology#">
-                            </div>
-                        </div>
-                        <div id="createRepoGenerateResult" style="display:none;"></div>
-                    </div>
-
-                    <div class="form-section">
-                        <h5><i class="fas fa-wand-magic-sparkles text-primary"></i>增强配置（继承/条件类型）</h5>
-                        <div class="alert alert-warning">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            生成后的 OWL/OBDA 默认只有“表=类、列=属性、外键=关系”。这里可以在创建前直接把继承（<code>rdfs:subClassOf</code>）与条件类型映射写进文件。
-                        </div>
-                        <div class="row">
-                            <div class="col-lg-6 mb-3">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <span><i class="fas fa-sitemap me-2"></i>继承（子类）</span>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label">子类（Class）</label>
-                                                <select id="enhSubClassIri" class="form-select"></select>
-                                                <small class="text-muted">从 OWL 编辑器自动解析</small>
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label">父类（Class）</label>
-                                                <select id="enhSuperClassIri" class="form-select"></select>
-                                                <small class="text-muted">从 OWL 编辑器自动解析</small>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applySubclassAxiomToOwlFromPage()">
-                                                <i class="fas fa-plus me-1"></i>写入 OWL
-                                            </button>
-                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="refreshOntologyEntityPickersFromEditors()">
-                                                <i class="fas fa-rotate me-1"></i>刷新下拉
-                                            </button>
-                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
-                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
-                                            </button>
-                                        </div>
-                                        <small class="text-muted d-block mt-2">
-                                            将写入：<code>owl:Class</code> 的 <code>rdfs:subClassOf</code> 公理（RDF/XML）。
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-6 mb-3">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <span><i class="fas fa-filter me-2"></i>条件类型映射（OBDA）</span>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label">类型（LocalName）</label>
-                                                <input id="enhTypeLocalName" class="form-control" value="doctor" placeholder="doctor">
-                                            </div>
-                                            <div class="col-6 mb-3">
-                                                <label class="form-label">个体模板</label>
-                                                <input id="enhSubjectTemplate" class="form-control" value=":employee/{emp_id}" placeholder=":table/{id}">
-                                            </div>
-                                            <div class="col-12 mb-3">
-                                                <label class="form-label">SQL 条件（可改）</label>
-                                                <input id="enhSqlCondition" class="form-control" value="FROM `employee` WHERE `is_doctor` = 1" placeholder="FROM `employee` WHERE ...">
-                                                <small class="text-muted">最终会生成：<code>SELECT `emp_id` ...</code>（<code>emp_id</code> 取自模板里的字段）</small>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyConditionalTypeMappingToObdaFromPage()">
-                                                <i class="fas fa-plus me-1"></i>写入 OBDA
-                                            </button>
-                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoObdaEditor')">
-                                                <i class="fas fa-pen me-1"></i>查看 OBDA 编辑器
-                                            </button>
-                                        </div>
-                                        <small class="text-muted d-block mt-2">
-                                            写入位置：OBDA 的 <code>]]</code> 之前（MappingDeclaration 末尾）。
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <span><i class="fas fa-diagram-project me-2"></i>官方常用关系（OWL/RDFS）</span>
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-sm btn-outline-secondary" type="button" onclick="refreshOntologyEntityPickersFromEditors()">
-                                                <i class="fas fa-rotate me-1"></i>从 OWL 刷新 Class/Property
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <span><i class="fas fa-right-left me-2"></i>互逆（inverseOf）</span>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row">
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">属性 A（ObjectProperty）</label>
-                                                                <select id="enhInversePropA" class="form-select"></select>
-                                                            </div>
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">属性 B（ObjectProperty）</label>
-                                                                <select id="enhInversePropB" class="form-select"></select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex flex-wrap gap-2">
-                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyInverseOfToOwlFromPage()">
-                                                                <i class="fas fa-plus me-1"></i>写入 OWL
-                                                            </button>
-                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
-                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
-                                                            </button>
-                                                        </div>
-                                                        <small class="text-muted d-block mt-2">
-                                                            写入：<code>&lt;owl:ObjectProperty ...&gt;&lt;owl:inverseOf .../&gt;&lt;/owl:ObjectProperty&gt;</code>
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <span><i class="fas fa-bullseye me-2"></i>定义域/值域（domain/range）</span>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row">
-                                                            <div class="col-12 mb-3">
-                                                                <label class="form-label">属性（ObjectProperty）</label>
-                                                                <select id="enhDomainRangeProp" class="form-select"></select>
-                                                            </div>
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">定义域（domain Class）</label>
-                                                                <select id="enhDomainClass" class="form-select"></select>
-                                                            </div>
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">值域（range Class）</label>
-                                                                <select id="enhRangeClass" class="form-select"></select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex flex-wrap gap-2">
-                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyDomainRangeToOwlFromPage()">
-                                                                <i class="fas fa-plus me-1"></i>写入 OWL
-                                                            </button>
-                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
-                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
-                                                            </button>
-                                                        </div>
-                                                        <small class="text-muted d-block mt-2">
-                                                            写入：<code>rdfs:domain</code> / <code>rdfs:range</code>（RDF/XML）。
-                                                        </small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <span><i class="fas fa-code-branch me-2"></i>子属性（subPropertyOf）</span>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row">
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">子属性</label>
-                                                                <select id="enhSubProp" class="form-select"></select>
-                                                            </div>
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">父属性</label>
-                                                                <select id="enhSuperProp" class="form-select"></select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex flex-wrap gap-2">
-                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applySubPropertyToOwlFromPage()">
-                                                                <i class="fas fa-plus me-1"></i>写入 OWL
-                                                            </button>
-                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
-                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-6 mb-3">
-                                                <div class="card">
-                                                    <div class="card-header">
-                                                        <span><i class="fas fa-layer-group me-2"></i>等价类（equivalentClass，可选）</span>
-                                                    </div>
-                                                    <div class="card-body">
-                                                        <div class="row">
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">类 A</label>
-                                                                <select id="enhEqClassA" class="form-select"></select>
-                                                            </div>
-                                                            <div class="col-6 mb-3">
-                                                                <label class="form-label">类 B</label>
-                                                                <select id="enhEqClassB" class="form-select"></select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="d-flex flex-wrap gap-2">
-                                                            <button class="btn btn-outline-primary btn-sm" type="button" onclick="applyEquivalentClassToOwlFromPage()">
-                                                                <i class="fas fa-plus me-1"></i>写入 OWL
-                                                            </button>
-                                                            <button class="btn btn-outline-secondary btn-sm" type="button" onclick="scrollToEditor('createRepoOwlEditor')">
-                                                                <i class="fas fa-pen me-1"></i>查看 OWL 编辑器
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-section">
-                        <h5><i class="fas fa-code text-primary"></i>生成文件编辑（创建前可直接改）</h5>
-                        <div class="row">
-                            <div class="col-lg-6 mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label mb-0">OWL（ontology.owl）</label>
-                                    <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-outline-secondary" type="button" onclick="loadGeneratedFileToEditorsFromPage()">
-                                            <i class="fas fa-sync-alt me-1"></i>重新载入生成文件
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="code-editor" id="createRepoOwlEditorWrap">
-                                    <textarea id="createRepoOwlEditor" placeholder="生成后将自动填充，可在此直接编辑 OWL..."></textarea>
-                                </div>
-                                <small class="text-muted">创建仓库时若这里有内容，将优先上传此 OWL（覆盖“生成文件引用”）。</small>
-                            </div>
-                            <div class="col-lg-6 mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label mb-0">OBDA（mapping.obda）</label>
-                                </div>
-                                <div class="code-editor" id="createRepoObdaEditorWrap">
-                                    <textarea id="createRepoObdaEditor" placeholder="生成后将自动填充，可在此直接编辑 OBDA..."></textarea>
-                                </div>
-                                <small class="text-muted">创建仓库时若这里有内容，将优先上传此 OBDA（覆盖“生成文件引用”）。</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Create FedX Repository Section -->
         <section id="section-create-fedx" class="section">
             <div class="card">
@@ -1002,9 +662,11 @@
                     <div class="form-section">
                         <h5><i class="fas fa-link text-primary"></i>联邦成员仓库</h5>
                         <div class="mb-3">
-                            <label class="form-label">可选成员（多选）</label>
-                            <select class="form-select" id="fedxMemberRepos" multiple size="10"></select>
-                            <small class="text-muted">按 Ctrl/Shift 多选。建议只选可读在线仓库，且不要包含 FedX 仓库本身。</small>
+                            <label class="form-label">可选成员（多选框）</label>
+                            <div id="fedxMemberRepos" class="border rounded p-3" style="max-height: 320px; overflow: auto;">
+                                <div class="text-muted">加载中...</div>
+                            </div>
+                            <small class="text-muted">已自动屏蔽 FedX 仓库。建议选择可读在线仓库。</small>
                         </div>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-outline-secondary" onclick="selectAllFedxMembers()">
@@ -1415,7 +1077,6 @@ LIMIT 100</textarea>
             const titles = {
                 'dashboard': '仪表盘',
                 'repositories': '仓库管理',
-                'create-repo': '创建仓库',
                 'create-fedx': '创建FedX仓库',
                 'query': 'SPARQL查询'
             };
@@ -1558,35 +1219,55 @@ LIMIT 100</textarea>
         }
 
         function refreshFedxMembers() {
-            const select = document.getElementById('fedxMemberRepos');
-            if (!select) return;
+            const container = document.getElementById('fedxMemberRepos');
+            if (!container) return;
             const repos = (currentRepos || []).filter(r => {
                 const type = (r.type || '').toLowerCase();
                 const isFedx = type.includes('fedx');
                 return !isFedx;
             });
-            select.innerHTML = repos.map(repo => {
-                const label = (repo.title || repo.id) + ' (' + repo.id + ')';
-                return `<option value="${repo.id}">${label}</option>`;
+            if (!repos.length) {
+                container.innerHTML = '<div class="text-muted">暂无可选成员仓库</div>';
+                return;
+            }
+            container.innerHTML = repos.map(repo => {
+                const readable = repo.readable ? '在线' : '离线';
+                const badgeClass = repo.readable ? 'bg-success' : 'bg-warning text-dark';
+                const label = (repo.title || repo.id);
+                return `
+                    <label class="d-flex align-items-center justify-content-between border rounded px-2 py-2 mb-2">
+                        <span class="d-flex align-items-center">
+                            <input class="form-check-input me-2 fedx-member-checkbox" type="checkbox" value="${repo.id}">
+                            <span>${label} <small class="text-muted">(${repo.id})</small></span>
+                        </span>
+                        <span class="badge ${badgeClass}">${readable}</span>
+                    </label>
+                `;
             }).join('');
         }
 
         function getSelectedFedxMembers() {
-            const select = document.getElementById('fedxMemberRepos');
-            if (!select) return [];
-            return Array.from(select.selectedOptions || []).map(o => o.value).filter(Boolean);
+            const container = document.getElementById('fedxMemberRepos');
+            if (!container) return [];
+            return Array.from(container.querySelectorAll('.fedx-member-checkbox:checked'))
+                .map(el => el.value)
+                .filter(Boolean);
         }
 
         function selectAllFedxMembers() {
-            const select = document.getElementById('fedxMemberRepos');
-            if (!select) return;
-            Array.from(select.options).forEach(o => o.selected = true);
+            const container = document.getElementById('fedxMemberRepos');
+            if (!container) return;
+            container.querySelectorAll('.fedx-member-checkbox').forEach(el => {
+                el.checked = true;
+            });
         }
 
         function clearFedxMembers() {
-            const select = document.getElementById('fedxMemberRepos');
-            if (!select) return;
-            Array.from(select.options).forEach(o => o.selected = false);
+            const container = document.getElementById('fedxMemberRepos');
+            if (!container) return;
+            container.querySelectorAll('.fedx-member-checkbox').forEach(el => {
+                el.checked = false;
+            });
         }
 
         function createFedxRepositoryFromPage() {

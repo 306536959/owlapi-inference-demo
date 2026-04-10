@@ -3,6 +3,7 @@ package com.example.owlapi.api;
 import com.example.owlapi.config.SystemBuiltinProperties;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
@@ -27,11 +28,8 @@ public class AuthController {
         String username = request.getOrDefault("username", "").trim();
         String password = request.getOrDefault("password", "");
 
-        String expectedUser = props.getGraphDb().getUsername() == null ? "" : props.getGraphDb().getUsername();
-        String expectedPass = props.getGraphDb().getPassword() == null ? "" : props.getGraphDb().getPassword();
-
         Map<String, Object> response = new HashMap<>();
-        if (expectedUser.equals(username) && expectedPass.equals(password)) {
+        if (verifyWithGraphDb(username, password)) {
             session.setAttribute(SESSION_AUTH, true);
             session.setAttribute(SESSION_MODE, "auth");
             session.setAttribute(SESSION_USER, username);
@@ -41,18 +39,7 @@ public class AuthController {
         }
 
         response.put("success", false);
-        response.put("message", "用户名或密码错误");
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/no-auth")
-    public ResponseEntity<Map<String, Object>> noAuth(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
-        session.setAttribute(SESSION_AUTH, true);
-        session.setAttribute(SESSION_MODE, "no-auth");
-        session.setAttribute(SESSION_USER, "guest");
-        response.put("success", true);
-        response.put("message", "No-auth login successful");
+        response.put("message", "GraphDB 鉴权失败，请检查用户名或密码");
         return ResponseEntity.ok(response);
     }
 
@@ -63,6 +50,7 @@ public class AuthController {
         response.put("authenticated", authenticated);
         response.put("mode", session.getAttribute(SESSION_MODE));
         response.put("user", session.getAttribute(SESSION_USER));
+        response.put("graphDbAuthRequired", isGraphDbAuthRequired());
         return ResponseEntity.ok(response);
     }
 
@@ -72,5 +60,55 @@ public class AuthController {
         session.invalidate();
         response.put("success", true);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/no-auth")
+    public ResponseEntity<Map<String, Object>> noAuth(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        if (isGraphDbAuthRequired()) {
+            response.put("success", false);
+            response.put("message", "GraphDB 已开启鉴权，不能无鉴权进入");
+            return ResponseEntity.ok(response);
+        }
+        session.setAttribute(SESSION_AUTH, true);
+        session.setAttribute(SESSION_MODE, "no-auth");
+        session.setAttribute(SESSION_USER, "guest");
+        response.put("success", true);
+        response.put("message", "GraphDB 未开启鉴权，已直接进入");
+        return ResponseEntity.ok(response);
+    }
+
+    private boolean verifyWithGraphDb(String username, String password) {
+        try {
+            String graphDbUrl = props.getGraphDb().getUrl();
+            RestTemplate restTemplate = new RestTemplate();
+            if (username != null && !username.trim().isEmpty()) {
+                restTemplate.getInterceptors().add((request, body, execution) -> {
+                    request.getHeaders().setBasicAuth(username, password == null ? "" : password);
+                    return execution.execute(request, body);
+                });
+            }
+            // Use a lightweight endpoint protected by GraphDB auth.
+            restTemplate.getForEntity(graphDbUrl + "/rest/locations", String.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isGraphDbAuthRequired() {
+        try {
+            String graphDbUrl = props.getGraphDb().getUrl();
+            RestTemplate restTemplate = new RestTemplate();
+            restTemplate.getForEntity(graphDbUrl + "/rest/locations", String.class);
+            return false;
+        } catch (org.springframework.web.client.HttpClientErrorException.Unauthorized e) {
+            return true;
+        } catch (org.springframework.web.client.HttpClientErrorException.Forbidden e) {
+            return true;
+        } catch (Exception e) {
+            // Unknown/unreachable: default to requiring auth for safety.
+            return true;
+        }
     }
 }

@@ -17,7 +17,7 @@
     <div class="card">
         <div class="card-body p-4">
             <h4 class="mb-3"><i class="fas fa-lock me-2 text-primary"></i>登录系统</h4>
-            <p class="text-muted mb-4">使用 GraphDB 账号登录，或在未开启鉴权时直接进入。</p>
+            <p class="text-muted mb-4">使用 GraphDB 账号登录；若 GraphDB 未开启鉴权，可直接进入。</p>
 
             <div class="mb-3">
                 <label class="form-label">用户名</label>
@@ -89,7 +89,7 @@
                     window.location.href = 'index.html';
                     return;
                 }
-                showError((data && data.message) || '进入失败');
+                showError((data && data.message) || 'GraphDB 已开启鉴权，不能直接进入');
             })
             .catch(err => showError(err.message));
     }
