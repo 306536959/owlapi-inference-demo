@@ -5,22 +5,18 @@ import com.example.owlapi.SchemaGeneratorArgs;
 import com.example.owlapi.SchemaToOwlGenerator;
 import com.example.owlapi.ObdaGeneratorArgs;
 import com.example.owlapi.SchemaToObdaGenerator;
-import com.example.owlapi.config.SystemBuiltinProperties;
-import com.example.owlapi.graphdb.GraphDbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,14 +25,6 @@ import java.util.stream.Stream;
 public class OntologyController {
 
     private static final Logger logger = LoggerFactory.getLogger(OntologyController.class);
-    private final SystemBuiltinProperties props;
-    private final GraphDbService graphDbService;
-
-    public OntologyController(SystemBuiltinProperties props, 
-                                GraphDbService graphDbService) {
-        this.props = props;
-        this.graphDbService = graphDbService;
-    }
 
     private String normalizeJdbcUrl(String jdbcUrl) {
         if (jdbcUrl == null) return null;
@@ -374,8 +362,6 @@ public class OntologyController {
         public String baseIri;
         public String includeTables;
         public String excludeTables;
-        public String outputFile;
-        public String obdaOutputFile;
     }
 
 }

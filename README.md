@@ -48,12 +48,11 @@ src/main/java/com/example/owlapi/
 ├── SchemaToOwlGenerator.java         # OWL 本体生成器
 ├── SchemaToObdaGenerator.java        # OBDA 映射生成器
 ├── api/                              # REST API
-│   ├── OntologyController.java       # 本体操作 API
-│   ├── GraphDbController.java       # GraphDB 管理 API
-│   └── SparqlGatewayService.java    # SPARQL 网关
-└── graphdb/                          # GraphDB 服务
-    ├── GraphDbService.java          # GraphDB 连接
-    └── GraphDbImportService.java    # 数据导入
+│   ├── OntologyController.java       # 本体 / 生成 / 文件下载 API
+│   ├── GraphDbController.java        # GraphDB 管理与 SPARQL 代理
+│   └── AuthController.java           # 登录态
+└── graphdb/
+    └── GraphDbImportService.java     # RDF 导入（RDF4J）
 ```
 
 ## REST API

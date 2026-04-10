@@ -2,7 +2,6 @@ package com.example.owlapi.api;
 
 import com.example.owlapi.config.SystemBuiltinProperties;
 import com.example.owlapi.graphdb.GraphDbImportService;
-import com.example.owlapi.graphdb.GraphDbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,14 +23,11 @@ public class GraphDbController {
     private static final Logger logger = LoggerFactory.getLogger(GraphDbController.class);
     private final SystemBuiltinProperties props;
     private final GraphDbImportService graphDbImportService;
-    private final GraphDbService graphDbService;
 
-    public GraphDbController(SystemBuiltinProperties props, 
-                              GraphDbImportService graphDbImportService,
-                              GraphDbService graphDbService) {
+    public GraphDbController(SystemBuiltinProperties props,
+                              GraphDbImportService graphDbImportService) {
         this.props = props;
         this.graphDbImportService = graphDbImportService;
-        this.graphDbService = graphDbService;
     }
 
     private org.springframework.web.client.RestTemplate createRestTemplate() {
